@@ -1,0 +1,102 @@
+---
+description: 네이버 지도 Blazor Server MVP 프로젝트 가이드라인
+globs: 
+alwaysApply: true
+---
+
+## 목적
+- 네이버 지도 기반 Blazor Server MVP: 지도 반경 검색으로 매칭 시간 단축 검증 (엑셀 30분 → 지도 클릭 3분).
+- 대상: Cursor 사용 개발자. 간결하고 실행 가능한 지침 유지.
+
+## 범위 및 목표
+- 지도 초기 로딩 5초 이내; 반경 필터 갱신 1초 이내.
+- Phase 4(Day 7) 종료 시 데모 가능 수준 UX 완성.
+
+## 기술 스택
+- Blazor Server (.NET 9), MudBlazor UI, Naver Maps JS API v3 (JS Interop).
+- 데이터 모델: `Person` + `PersonType` (`User`, `Assistant`).
+- 서비스 등록: `Program.cs`에서 MudBlazor, `MockDataService` 등록.
+
+## 레이아웃 & UX
+- MainLayout: 좌측 30% (목록/필터) / 우측 70% (지도).
+- AppBar 타이틀: "LMP-Link MVP".
+- 좌측: MudDataGrid로 이용자/지원사 표시, 거리순 정렬, 반경 필터(1km/3km/전체).
+- 우측: 도봉구청 좌표(37.6688, 127.0471) 중심 네이버 지도.
+- 마커 스타일: 이용자 → 파란 원, 지원사 → 주황 사각형. 호버/툴팁에 이름+주소 표시.
+
+## 데이터 & Mock
+- MockDataService: 이용자 10명, 지원사 20명 (중심 기준 0~4km 분포, 이미 구현됨).
+- Mock ID는 고정 값 사용; 런타임 랜덤 금지.
+
+## 네이버 지도 API 설정 (2025년 기준)
+
+### API 스크립트 로드
+- **필수**: `ncpKeyId` 파라미터 사용 (기존 `ncpClientId` 아님!)
+- 공식 문서: https://navermaps.github.io/maps.js.ncp/docs/tutorial-2-Getting-Started.html
+
+```html
+<!-- 올바른 방식 (2025년 신규) -->
+<script src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=YOUR_CLIENT_ID"></script>
+
+<!-- 잘못된 방식 (기존, 더 이상 작동 안 함) -->
+<script src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpClientId=YOUR_CLIENT_ID"></script>
+```
+
+### 인증 키 구분
+| 항목 | 용도 | 예시 |
+|------|------|------|
+| **Client ID** | JavaScript API (`ncpKeyId` 파라미터) | `a5r744p216` |
+| **Client Secret** | 서버 사이드 API 헤더용 (X-NCP-APIGW-API-KEY) | 긴 문자열 |
+
+### 네이버 클라우드 플랫폼 콘솔 설정
+1. **Web Dynamic Map** 서비스 활성화 필수
+2. **Web 서비스 URL** 등록 (슬래시 유무 모두):
+   - `http://localhost:5000`
+   - `http://localhost:5000/`
+   - `http://127.0.0.1:5000`
+   - `http://127.0.0.1:5000/`
+
+### 인증 실패 디버깅
+- `window.navermap_authFailure` 함수 정의하여 실패 시 상세 로그 출력
+- 브라우저 Network 탭에서 `maps.js` 요청의 Referer 헤더 확인
+
+## JS Interop 가이드
+- `wwwroot/js/naverMap.js`에 네이버 지도 interop 정의.
+- 네임스페이스 함수 사용: `window.initMap`, `addMarker`, `drawCircle`, `setMarkerVisible`, `clearCircle`.
+- 최소 DTO 전달: `{ id, type, lat, lng, name, address }`.
+- 지도 초기화 시 API 스크립트 중복 로드 방지; 키 누락 시 즉시 실패.
+- `IJSRuntime.InvokeVoidAsync`로 단방향 호출; 반환값 필요 시만 `InvokeAsync<T>` 사용.
+- 빠른 UI 변경 시 JS 측 디바운스 적용.
+
+### Blazor에서 JavaScript 렌더링 주의사항
+- **금지**: Razor 코드 블록 내에서 복잡한 JavaScript 인라인 작성
+- **권장**: JavaScript는 외부 `.js` 파일로 분리
+- Razor 변수를 JS에 전달 시 `@apiKey` 직접 사용 대신 HTML 속성이나 간단한 문자열만 사용
+- 복잡한 JS 로직은 `wwwroot/js/` 파일에 작성 후 interop 호출
+
+## 반경 로직
+- 이용자 마커 클릭 → 해당 위치에 반투명 파란 원(선택된 반경) 그리기.
+- Haversine 공식(`DistanceCalculator`)으로 거리(km) 계산; UI 표시 전 소수점 2자리 반올림.
+- 반경 밖 지원사 마커는 JS visibility 토글로 숨김; C# 필터링 후 DataGrid 동기화.
+
+## 성능 예산
+- 지도 초기화 <5초 (콜드). 30개 마커 렌더/필터 <1초.
+- 반경 변경당 JS interop 호출 최소화: 일괄 업데이트.
+
+## 보안 & 시크릿
+- 네이버 API 키 하드코딩 금지. User Secrets 또는 환경변수 사용; 레이아웃에 설정으로 주입.
+- 외부 입력은 쿼리/interop 사용 전 검증.
+- 서버 에러 UI 노출 금지; 친화적 토스트/스낵바 사용.
+
+## 테스트 기대사항
+- 정적 데이터 기반 결정적 테스트: 지도 초기화, 마커 개수, 반경 필터 결과, 거리 계산 엣지케이스(거리 0, 사분면 교차).
+- 수동 데모 체크리스트: 지도 로드, 1km/3km/전체 버튼 동작, 이용자 클릭 시 원+그리드 갱신, 성능 예산 충족.
+
+## Cursor 사용 참고
+- 플랜 파일 직접 수정 금지; TODO는 도구로 업데이트.
+- 편집 시 `apply_patch` 우선; 사용자 변경 되돌리기 금지.
+- 문서는 ASCII 유지; 간결한 불릿; 코드는 early-return 패턴.
+
+## 산출물 요약
+- `PLAN.md` (루트): 4개 Phase 일별 마일스톤, 체크리스트, 수락 기준.
+- 본 가이드라인 파일: MVP 빌드 운영 규칙.

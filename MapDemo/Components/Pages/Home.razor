@@ -1,0 +1,222 @@
+﻿@page "/"
+@using MapDemo.Models
+@using MapDemo.Services
+@using Microsoft.JSInterop
+@inject MockDataService DataService
+@inject IJSRuntime JS
+@implements IAsyncDisposable
+
+<PageTitle>LMP-Link MVP</PageTitle>
+
+<div class="map-container">
+    <!-- 좌측 패널 (30%) -->
+    <div class="left-panel">
+        <MudPaper Elevation="2" Class="pa-4" Style="height: 100%;">
+            <MudText Typo="Typo.h6" Class="mb-4">인원 목록</MudText>
+            
+            <!-- 필터 버튼 -->
+            <MudButtonGroup Color="Color.Primary" Variant="Variant.Outlined" Class="mb-4">
+                <MudButton OnClick="@(() => FilterByRadius(1))">1km</MudButton>
+                <MudButton OnClick="@(() => FilterByRadius(3))">3km</MudButton>
+                <MudButton OnClick="@(() => ShowAll())">전체</MudButton>
+            </MudButtonGroup>
+
+            <!-- 데이터 그리드 -->
+            <MudDataGrid Items="@filteredPeople" Dense="true" Hover="true" Style="max-height: calc(100vh - 250px);">
+                <Columns>
+                    <PropertyColumn Property="x => x.Name" Title="이름" />
+                    <PropertyColumn Property="x => x.Type" Title="타입">
+                        <CellTemplate>
+                            @if (context.Item.Type == PersonType.User)
+                            {
+                                <MudChip Size="Size.Small" Color="Color.Primary">이용자</MudChip>
+                            }
+                            else
+                            {
+                                <MudChip Size="Size.Small" Color="Color.Warning">지원사</MudChip>
+                            }
+                        </CellTemplate>
+                    </PropertyColumn>
+                    <PropertyColumn Property="x => GetDistance(x)" Title="거리(km)" Format="F2" />
+                    <PropertyColumn Property="x => x.Address" Title="주소" />
+                </Columns>
+            </MudDataGrid>
+        </MudPaper>
+    </div>
+
+    <!-- 우측 패널 (70%) - 지도 -->
+    <div class="right-panel">
+        <div id="map" style="width: 100%; height: 100%;"></div>
+    </div>
+</div>
+
+@code {
+    private List<Person> allPeople = new();
+    private List<Person> filteredPeople = new();
+    private Person? selectedUser = null;
+    private double currentRadius = 0;
+
+    // 도봉구청 좌표
+    private const double CenterLat = 37.6688;
+    private const double CenterLng = 127.0471;
+    private const int DefaultZoom = 14;
+
+    protected override async Task OnInitializedAsync()
+    {
+        allPeople = DataService.GetAllPeople();
+        filteredPeople = allPeople;
+    }
+
+    private DotNetObjectReference<Home>? dotNetRef;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            try
+            {
+                // DotNetObjectReference 생성
+                dotNetRef = DotNetObjectReference.Create(this);
+
+                // 네이버 지도 API 로드 대기 (최대 5초)
+                var apiLoaded = await WaitForNaverMapsApi(JS, 5000);
+                if (!apiLoaded)
+                {
+                    Console.WriteLine("네이버 지도 API 로드 시간 초과");
+                    return;
+                }
+
+                // 지도 초기화
+                await JS.InvokeVoidAsync("initMap", "map", CenterLat, CenterLng, DefaultZoom);
+
+                // DotNetObjectReference를 JS에 전달
+                await JS.InvokeVoidAsync("setDotNetReference", dotNetRef);
+
+                // 모든 마커 추가
+                foreach (var person in allPeople)
+                {
+                    await JS.InvokeVoidAsync("addMarker", person.Id, person.Lat, person.Lng, person.Type.ToString(), person.Name);
+                }
+            }
+            catch (JSException ex)
+            {
+                Console.WriteLine($"지도 초기화 오류: {ex.Message}");
+            }
+        }
+    }
+
+    private async Task<bool> WaitForNaverMapsApi(IJSRuntime js, int timeoutMs)
+    {
+        var startTime = DateTime.Now;
+        while ((DateTime.Now - startTime).TotalMilliseconds < timeoutMs)
+        {
+            try
+            {
+                var isLoaded = await js.InvokeAsync<bool>("eval", "typeof naver !== 'undefined' && typeof naver.maps !== 'undefined'");
+                if (isLoaded)
+                {
+                    return true;
+                }
+            }
+            catch
+            {
+                // API가 아직 로드되지 않음
+            }
+            await Task.Delay(100);
+        }
+        return false;
+    }
+
+    [JSInvokable]
+    public async Task OnUserMarkerClicked(string userId, double lat, double lng)
+    {
+        // 이용자 선택
+        selectedUser = allPeople.FirstOrDefault(p => p.Id == userId && p.Type == PersonType.User);
+        if (selectedUser != null)
+        {
+            // 현재 반경이 있으면 다시 필터링
+            if (currentRadius > 0)
+            {
+                await FilterByRadius(currentRadius);
+            }
+            else
+            {
+                // 기본 1km로 필터링
+                await FilterByRadius(1);
+            }
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (dotNetRef != null)
+        {
+            dotNetRef.Dispose();
+        }
+    }
+
+    private async Task FilterByRadius(double radiusKm)
+    {
+        if (selectedUser == null)
+        {
+            // 첫 번째 이용자 선택
+            selectedUser = allPeople.FirstOrDefault(p => p.Type == PersonType.User);
+            if (selectedUser == null) return;
+        }
+
+        currentRadius = radiusKm;
+
+        // Circle 그리기
+        await JS.InvokeVoidAsync("drawCircle", selectedUser.Lat, selectedUser.Lng, radiusKm);
+
+        // 반경 내 지원사 필터링
+        var assistants = allPeople.Where(p => p.Type == PersonType.Assistant).ToList();
+        var filteredAssistants = new List<Person>();
+
+        foreach (var assistant in assistants)
+        {
+            var distance = DistanceCalculator.CalculateDistance(
+                selectedUser.Lat, selectedUser.Lng,
+                assistant.Lat, assistant.Lng);
+
+            if (distance <= radiusKm)
+            {
+                filteredAssistants.Add(assistant);
+                await JS.InvokeVoidAsync("setMarkerVisible", assistant.Id, true);
+            }
+            else
+            {
+                await JS.InvokeVoidAsync("setMarkerVisible", assistant.Id, false);
+            }
+        }
+
+        // 이용자 + 필터링된 지원사
+        filteredPeople = new List<Person> { selectedUser };
+        filteredPeople.AddRange(filteredAssistants.OrderBy(a => 
+            DistanceCalculator.CalculateDistance(selectedUser.Lat, selectedUser.Lng, a.Lat, a.Lng)));
+
+        StateHasChanged();
+    }
+
+    private async Task ShowAll()
+    {
+        selectedUser = null;
+        currentRadius = 0;
+        filteredPeople = allPeople;
+
+        await JS.InvokeVoidAsync("clearCircle");
+        await JS.InvokeVoidAsync("showAllMarkers");
+
+        StateHasChanged();
+    }
+
+    private double GetDistance(Person person)
+    {
+        if (selectedUser == null || person.Type == PersonType.User)
+            return 0;
+
+        return DistanceCalculator.CalculateDistance(
+            selectedUser.Lat, selectedUser.Lng,
+            person.Lat, person.Lng);
+    }
+}
