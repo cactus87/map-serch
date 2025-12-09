@@ -1,0 +1,99 @@
+---
+description: Document Reference Map - 필요할 때 @mention으로 참조
+globs: []
+alwaysApply: false
+---
+
+# 📚 Document Reference Map
+
+> **사용법**: 필요한 문서를 `@mention`으로 참조  
+> 예: "@MAUI_개발_가이드.md", "@트러블슈팅_MainPage_DI_CommandParameter.md"
+
+---
+
+## 🎯 작업 계획 문서
+
+### 진척_관리.md
+- **용도**: 일일 작업 로그, 체크리스트, 주간 회고
+- **참조 시점**: 매일 아침 작업 시작 전
+- **업데이트**: 작업 완료 후 즉시
+
+### MAUI_통합_로드맵.md
+- **용도**: Week 1-4 통합 로드맵, Cursor AI 프롬프트 모음
+- **참조 시점**: 새로운 Week 시작 시
+
+### 작업_일관성_분석_및_통합_계획.md
+- **용도**: Week-by-Week 상세 프롬프트 & 완료 조건
+- **참조 시점**: Day 작업 시작 전
+
+---
+
+## 🛠️ 기술 가이드 문서
+
+### MAUI_개발_가이드.md (1,199 lines)
+- **Section 4**: MVVM 패턴
+- **Section 6**: WebView + JS Interop
+- **Section 9**: ⭐ 핵심 패턴 & 주의사항
+
+### 트러블슈팅_MainPage_DI_CommandParameter.md
+- **용도**: MainPage 즉시 종료 문제 해결 기록
+- **참조 시점**: DI 에러, CommandParameter 에러 발생 시
+- **핵심 내용**:
+  - XAML CommandParameter 타입 불일치
+  - MAUI DI 패턴 (IPlatformApplication.Current.Services)
+  - 파일 로깅 전략
+
+### 네이버_API_인증_가이드.md
+- **용도**: 네이버 Maps API 인증 문제 해결
+- **참조 시점**: 지도가 안 뜰 때, "인증 실패" alert 발생 시
+- **필수 설정**:
+  - Web 서비스 URL 등록 (file:///, localhost 등)
+  - Client ID: a5r744p216
+
+---
+
+## 🎨 디자인 문서
+
+### 디자인-코드_매핑.md
+- **용도**: 디자인 시스템 → XAML 1:1 매핑
+- **참조 시점**: UI 컴포넌트 작성 시
+- **내용**: 색상, 버튼, 카드 XAML 코드
+
+### 디자인_시스템.md
+- **용도**: UI/UX 원칙 (다크 테마, 타이포그래피)
+- **참조 시점**: 디자인 의사결정 시
+
+---
+
+## 🗄️ 데이터 문서
+
+### Supabase_스키마.md
+- **용도**: ERD, 테이블 정의, RLS 정책, PostGIS 쿼리
+- **참조 시점**: Week 3+ (Supabase 연동 시)
+
+---
+
+## 📖 참고 문서
+
+### Blazor_to_MAUI_참고자료.md
+- **용도**: 기존 Blazor 프로젝트 참고 로직
+- **위치**: MapDemo/ 폴더
+- **검증된 로직**: Haversine 거리 계산, 네이버 지도 JS Interop
+
+---
+
+## 빠른 참조 (Quick Lookup)
+
+| 문제 상황 | 참조 문서 |
+|-----------|-----------|
+| 앱 즉시 종료 | 트러블슈팅_MainPage_DI_CommandParameter.md |
+| 지도 안 뜸 | 네이버_API_인증_가이드.md |
+| XAML 에러 | 11-maui-xaml.mdc |
+| DI 에러 | 12-maui-di.mdc |
+| ViewModel 패턴 | 10-maui-mvvm.mdc |
+| UI 코드 | 디자인-코드_매핑.md |
+
+---
+
+**버전**: 1.0  
+**업데이트**: 2025-12-10

@@ -1,0 +1,80 @@
+---
+description: LMP-Link MAUI MVP - Core Principles & Document Map
+alwaysApply: true
+---
+
+# LMP-Link MAUI MVP - Core Rules
+
+## 목적
+- 네이버 지도 기반 .NET MAUI MVP
+- 지도 반경 검색으로 매칭 시간 단축 검증 (엑셀 30분 → 지도 3분)
+- 대상: Cursor 사용 1인 개발자
+
+## 기술 스택
+- .NET MAUI 10.0 (.NET 10), C# 13
+- MVVM (CommunityToolkit.Mvvm)
+- Naver Maps (WebView + JS Interop)
+
+## 핵심 원칙
+
+### 1. 언어 규칙
+- **코드/주석/커밋**: 영어
+- **문서/UI**: 한글
+- **에러 로그**: 영어
+
+### 2. 타입 안전성
+- `#nullable enable` 전체 파일
+- Null 체크 필수 (`if (x == null) return;`)
+- No `!` (null-forgiving operator)
+
+### 3. 에러 처리
+- Early return 패턴
+- Try-catch로 스택 트레이스 로깅
+- 파일 로그: `Desktop/maui_debug.log`
+
+### 4. 성능 목표
+- 앱 시작: <2초
+- 지도 로드: <3초
+- 반경 필터: <500ms
+
+---
+
+## 📚 문서 참조 맵 (상황별)
+
+### 작업 시작 전
+- `진척_관리.md` - 오늘 할 일 확인
+
+### MVVM 작업 시
+- **규칙**: @10-maui-mvvm.mdc (ViewModel 편집 시 자동 로드)
+- **가이드**: MAUI_개발_가이드.md Section 4
+
+### XAML 작업 시
+- **규칙**: @11-maui-xaml.mdc (XAML 편집 시 자동 로드)
+- **코드**: 디자인-코드_매핑.md
+
+### 네이버 지도 작업 시
+- **규칙**: @12-maui-webview.mdc (WebView 편집 시 자동 로드)
+- **가이드**: 네이버_API_인증_가이드.md
+
+### 디버깅 시
+- **가이드**: 트러블슈팅_MainPage_DI_CommandParameter.md
+- **패턴**: MauiProgram.Log() 파일 로깅
+
+### Supabase 작업 시 (Week 3+)
+- Supabase_스키마.md
+
+---
+
+## 🚨 즉시 확인 체크리스트
+
+MAUI 파일 편집 전 확인:
+- [ ] Page는 기본 생성자 (`public MainPage()`)
+- [ ] DI는 `IPlatformApplication.Current.Services` 사용
+- [ ] XAML CommandParameter는 타입 명시 (`<x:Double>`)
+- [ ] Nullable 필드는 모든 메서드에서 null 체크
+
+---
+
+**버전**: 2.0  
+**최종 업데이트**: 2025-12-10  
+**Context 사용량**: ~60 lines (기존 890 lines에서 93% 감소)

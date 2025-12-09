@@ -1,0 +1,88 @@
+---
+description: MAUI XAML Pattern - CommandParameter, Binding, StaticResource
+globs:
+  - "**/*.xaml"
+alwaysApply: false
+---
+
+# MAUI XAML Pattern Rules
+
+## CommandParameter 타입 명시 ⚠️ (필수!)
+
+### ❌ 잘못된 패턴
+```xml
+<Button CommandParameter="1.0" />      <!-- String -->
+<Button CommandParameter="123" />      <!-- String -->
+<Button CommandParameter="true" />     <!-- String -->
+```
+
+### ✅ 올바른 패턴
+```xml
+<Button Command="{Binding ChangeRadiusCommand}">
+    <Button.CommandParameter>
+        <x:Double>1.0</x:Double>
+    </Button.CommandParameter>
+</Button>
+
+<Button.CommandParameter>
+    <x:Int32>123</x:Int32>
+</Button.CommandParameter>
+
+<Button.CommandParameter>
+    <x:Boolean>True</x:Boolean>
+</Button.CommandParameter>
+```
+
+## 타입 변환 테이블
+
+| C# 타입 | XAML 표현 |
+|---------|-----------|
+| `double` | `<x:Double>3.14</x:Double>` |
+| `int` | `<x:Int32>42</x:Int32>` |
+| `bool` | `<x:Boolean>True</x:Boolean>` |
+| `string` | `"Hello"` (따옴표) |
+
+## Binding 패턴
+
+```xml
+<!-- Property Binding -->
+<Label Text="{Binding UserName}" />
+
+<!-- Command Binding -->
+<Button Command="{Binding SaveCommand}" />
+
+<!-- TwoWay Binding -->
+<Entry Text="{Binding SearchText, Mode=TwoWay}" />
+
+<!-- Converter -->
+<Label IsVisible="{Binding IsLoading, Converter={StaticResource InvertedBoolConverter}}" />
+```
+
+## StaticResource 사용
+
+```xml
+<!-- 색상 -->
+<Label TextColor="{StaticResource PrimaryCTA}" />
+
+<!-- 스타일 -->
+<Label Style="{StaticResource Heading1}" />
+
+<!-- Converter -->
+<Label IsVisible="{Binding Phone, Converter={StaticResource IsNotNullConverter}}" />
+```
+
+## Grid Layout
+
+```xml
+<Grid ColumnDefinitions="3*,7*" RowDefinitions="Auto,*">
+    <!-- Column 0, Row 0 -->
+    <Label Grid.Column="0" Grid.Row="0" Text="Left" />
+    
+    <!-- Column 1, Row 0 -->
+    <Label Grid.Column="1" Grid.Row="0" Text="Right" />
+</Grid>
+```
+
+---
+
+**참고**: 디자인-코드_매핑.md (색상/버튼/카드 XAML 코드)

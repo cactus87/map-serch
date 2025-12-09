@@ -1,11 +1,13 @@
 ---
-description: .NET MAUI 9.0 & C# 13 Standards for LMP-Link Cross-Platform App (Windows + Android)
-globs: 
-  - "**/*.cs"
-  - "**/*.xaml"
-  - "**/*.csproj"
+description: "[DEPRECATED] Use 00-core.mdc + modular rules instead"
+globs: []
 alwaysApply: false
-priority: 60
+---
+
+# ⚠️ DEPRECATED - DO NOT USE
+
+This file has been split into smaller, context-specific rules.
+
 ---
 
 # .NET MAUI 9.0 & C# 13 Standards (2025)

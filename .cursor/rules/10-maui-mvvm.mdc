@@ -1,0 +1,92 @@
+---
+description: MAUI MVVM Pattern - BaseViewModel, RelayCommand, ObservableProperty
+globs:
+  - "**/ViewModels/**/*.cs"
+  - "**/MainPage.xaml.cs"
+  - "**/AppShell.xaml.cs"
+alwaysApply: false
+---
+
+# MAUI MVVM Pattern Rules
+
+## BaseViewModel Pattern
+
+```csharp
+using CommunityToolkit.Mvvm.ComponentModel;
+
+public abstract partial class BaseViewModel : ObservableObject
+{
+    [ObservableProperty]
+    private bool _isLoading;
+
+    [ObservableProperty]
+    private string _title = string.Empty;
+}
+```
+
+## RelayCommand<T> 타입 안전성 ⚠️
+
+### 올바른 패턴
+```csharp
+// ViewModel
+[RelayCommand]
+private void ChangeRadius(double radius)  // double 타입
+{
+    CurrentRadius = radius;
+}
+
+// XAML (타입 일치 필수!)
+<Button.CommandParameter>
+    <x:Double>1.0</x:Double>  <!-- double -->
+</Button.CommandParameter>
+```
+
+### 타입 불일치 시 에러
+```
+ArgumentException: Parameter "parameter" (object) cannot be of type System.String,
+as the command type requires an argument of type System.Double.
+```
+
+## ObservableProperty 패턴
+
+```csharp
+// 필드 이름: _camelCase
+[ObservableProperty]
+private string _userName = string.Empty;
+
+// 자동 생성되는 속성: PascalCase
+public string UserName { get; set; }  // Source Generator 생성
+```
+
+## Async Command
+
+```csharp
+[RelayCommand]
+private async Task LoadDataAsync()
+{
+    IsLoading = true;
+    try
+    {
+        // async 작업
+        await Task.Delay(1000);
+    }
+    finally
+    {
+        IsLoading = false;
+    }
+}
+```
+
+## PropertyChanged 이벤트
+
+```csharp
+partial void OnUserNameChanged(string value)
+{
+    // UserName 속성 변경 시 자동 호출
+    ValidateUserName(value);
+}
+```
+
+---
+
+**참고**: MAUI_개발_가이드.md Section 9.5 (CommunityToolkit.Mvvm 타입 검증)

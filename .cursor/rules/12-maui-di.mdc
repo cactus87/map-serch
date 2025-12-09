@@ -1,0 +1,101 @@
+---
+description: MAUI Dependency Injection Pattern
+globs:
+  - "**/MauiProgram.cs"
+  - "**/MainPage.xaml.cs"
+  - "**/App.xaml.cs"
+alwaysApply: false
+---
+
+# MAUI Dependency Injection Rules
+
+## Page DI 패턴 ⚠️ (필수!)
+
+### ❌ 잘못된 패턴 (생성자 주입 불가)
+```csharp
+public MainPage(MapViewModel viewModel, IMapService mapService)  // ❌
+{
+    InitializeComponent();
+    _viewModel = viewModel;
+}
+```
+
+**이유**: Shell의 `DataTemplate`은 **기본 생성자만 호출**
+
+---
+
+### ✅ 올바른 패턴 (IPlatformApplication.Current.Services)
+```csharp
+public partial class MainPage : ContentPage
+{
+    private MapViewModel? _viewModel;  // nullable 필수
+    private IMapService? _mapService;
+
+    public MainPage()  // 기본 생성자
+    {
+        InitializeComponent();
+
+        // DI 컨테이너 접근
+        var services = IPlatformApplication.Current?.Services;
+        if (services == null)
+        {
+            MauiProgram.Log("Services not available");
+            return;
+        }
+
+        _viewModel = services.GetRequiredService<MapViewModel>();
+        _mapService = services.GetRequiredService<IMapService>();
+        BindingContext = _viewModel;
+    }
+}
+```
+
+## MauiProgram.cs 서비스 등록
+
+```csharp
+public static class MauiProgram
+{
+    public static MauiApp CreateMauiApp()
+    {
+        var builder = MauiApp.CreateBuilder();
+
+        // Services (Singleton - 앱 전체 공유)
+        builder.Services.AddSingleton<IMockDataService, MockDataService>();
+        builder.Services.AddSingleton<ILocationService, LocationService>();
+        builder.Services.AddSingleton<IMapService, MapService>();
+
+        // ViewModels (Transient - 매번 새 인스턴스)
+        builder.Services.AddTransient<MapViewModel>();
+
+        // Pages (Transient)
+        builder.Services.AddTransient<MainPage>();
+
+        return builder.Build();
+    }
+}
+```
+
+## Null-Safe 패턴
+
+```csharp
+// 모든 메서드에서 null 체크
+protected override async void OnAppearing()
+{
+    base.OnAppearing();
+    
+    if (_viewModel == null) return;  // Early return
+    
+    await _viewModel.LoadDataCommand.ExecuteAsync(null);
+}
+
+private async Task HandleRadiusChanged()
+{
+    if (_viewModel == null || _mapService == null) return;
+    
+    // 로직 실행
+}
+```
+
+---
+
+**참고**: 트러블슈팅_MainPage_DI_CommandParameter.md Section 3

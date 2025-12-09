@@ -1,12 +1,11 @@
 ---
-description: ".NET 9, C# 13, Blazor Server & MudBlazor Applications"
-globs:
-  - "**/*.cs"
-  - "**/*.razor"
-  - "**/*.csproj"
-  - "**/Program.cs"
+description: "[DEPRECATED] Blazor rules not used in MAUI project"
+globs: []
 alwaysApply: false
-priority: 8
+---
+
+# ⚠️ DEPRECATED - Blazor 프로젝트용 (MAUI에서 미사용)
+
 ---
 
 # .NET 9 & C# 13 Standards for Blazor Server (2025)
