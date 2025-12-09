@@ -257,6 +257,9 @@ public partial class MainPage : ContentPage
             {
                 await _mapService.SetMarkerVisibleAsync(user.Id, true);
             }
+
+            // Update counts from JavaScript (실제 지도에 표시된 마커 개수)
+            await UpdateMarkerCountsFromMap();
         }
     }
 
@@ -281,6 +284,30 @@ public partial class MainPage : ContentPage
             {
                 await _mapService.SetMarkerVisibleAsync(assistant.Id, true);
             }
+
+            // Update counts from JavaScript (실제 지도에 표시된 마커 개수)
+            await UpdateMarkerCountsFromMap();
+        }
+    }
+
+    private async Task UpdateMarkerCountsFromMap()
+    {
+        if (_viewModel == null || _mapService == null) return;
+
+        try
+        {
+            // Get actual visible marker count from JavaScript
+            var (users, assistants) = await _mapService.GetVisibleMarkerCountAsync();
+            
+            // Update ViewModel with accurate counts
+            _viewModel.UsersInRadius = users;
+            _viewModel.AssistantsInRadius = assistants;
+
+            MauiProgram.Log($"Marker count updated: 이용자 {users}명, 지원사 {assistants}명");
+        }
+        catch (Exception ex)
+        {
+            MauiProgram.Log($"Failed to update marker counts: {ex.Message}");
         }
     }
 

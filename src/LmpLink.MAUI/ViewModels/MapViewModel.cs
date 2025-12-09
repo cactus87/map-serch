@@ -227,8 +227,7 @@ public partial class MapViewModel : BaseViewModel
         {
             // Show all
             FilteredAssistants = new ObservableCollection<Person>(Assistants);
-            AssistantsInRadius = Assistants.Count;
-            UsersInRadius = Users.Count;
+            // Counts will be updated by JavaScript in MainPage.xaml.cs
         }
         else
         {
@@ -240,15 +239,7 @@ public partial class MapViewModel : BaseViewModel
             );
 
             FilteredAssistants = new ObservableCollection<Person>(filtered);
-            AssistantsInRadius = filtered.Count; // 반경 내 지원사 수
-
-            // Calculate users in radius (선택된 이용자 주변의 다른 이용자들)
-            var usersInRange = _locationService.FilterByRadius(
-                SelectedUser,
-                Users.Where(u => u.Id != SelectedUser.Id).ToList(),
-                CurrentRadius
-            );
-            UsersInRadius = usersInRange.Count + 1; // +1 = 선택된 이용자 포함
+            // Counts will be updated by JavaScript in MainPage.xaml.cs
         }
 
         UpdateFilterStatusText();
@@ -274,8 +265,7 @@ public partial class MapViewModel : BaseViewModel
         {
             // Show all
             FilteredUsers = new ObservableCollection<Person>(Users);
-            UsersInRadius = Users.Count;
-            AssistantsInRadius = Assistants.Count;
+            // Counts will be updated by JavaScript in MainPage.xaml.cs
         }
         else
         {
@@ -287,15 +277,7 @@ public partial class MapViewModel : BaseViewModel
             );
 
             FilteredUsers = new ObservableCollection<Person>(filtered);
-            UsersInRadius = filtered.Count; // 반경 내 이용자 수
-
-            // Calculate assistants in radius (선택된 지원사 주변의 다른 지원사들)
-            var assistantsInRange = _locationService.FilterByRadius(
-                SelectedAssistant,
-                Assistants.Where(a => a.Id != SelectedAssistant.Id).ToList(),
-                CurrentRadius
-            );
-            AssistantsInRadius = assistantsInRange.Count + 1; // +1 = 선택된 지원사 포함
+            // Counts will be updated by JavaScript in MainPage.xaml.cs
         }
 
         UpdateFilterStatusText();

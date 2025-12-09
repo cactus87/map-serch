@@ -274,6 +274,30 @@
             }
         }
         
+        // Get visible marker count (지도에 실제로 표시된 마커 개수)
+        function getVisibleMarkerCount() {
+            try {
+                let userCount = 0;
+                let assistantCount = 0;
+                
+                Object.values(markers).forEach(marker => {
+                    if (marker.getMap()) { // 지도에 표시 중인 마커만
+                        if (marker._personType === 'user') {
+                            userCount++;
+                        } else {
+                            assistantCount++;
+                        }
+                    }
+                });
+                
+                console.log(`Visible markers: 이용자 ${userCount}명, 지원사 ${assistantCount}명`);
+                return JSON.stringify({ users: userCount, assistants: assistantCount });
+            } catch (error) {
+                console.error('Get visible marker count failed:', error);
+                return JSON.stringify({ users: 0, assistants: 0 });
+            }
+        }
+        
         // Initialize on page load
         window.addEventListener('load', function() {
             console.log('Page loaded, initializing map...');

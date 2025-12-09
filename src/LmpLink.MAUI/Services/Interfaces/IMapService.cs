@@ -81,4 +81,10 @@ public interface IMapService
     /// </summary>
     /// <param name="personId">Person ID</param>
     Task FocusMarkerAsync(int personId);
+
+    /// <summary>
+    /// Get count of visible markers on the map (actually displayed).
+    /// </summary>
+    /// <returns>Tuple of (userCount, assistantCount)</returns>
+    Task<(int users, int assistants)> GetVisibleMarkerCountAsync();
 }

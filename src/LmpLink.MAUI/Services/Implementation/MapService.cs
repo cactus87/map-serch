@@ -215,6 +215,35 @@ public class MapService : IMapService
         }
     }
 
+    /// <inheritdoc />
+    public async Task<(int users, int assistants)> GetVisibleMarkerCountAsync()
+    {
+        ThrowIfWebViewNotSet();
+        ThrowIfMapNotInitialized();
+
+        try
+        {
+            var result = await EvaluateJavaScriptAsync("window.getVisibleMarkerCount();");
+            
+            if (string.IsNullOrWhiteSpace(result))
+            {
+                throw new InvalidOperationException("Empty response from getVisibleMarkerCount");
+            }
+
+            var json = JsonSerializer.Deserialize<MarkerCountResult>(result);
+            if (json == null)
+            {
+                throw new InvalidOperationException("Failed to parse getVisibleMarkerCount response");
+            }
+
+            return (json.Users, json.Assistants);
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException($"Failed to get visible marker count: {ex.Message}", ex);
+        }
+    }
+
     // ===== Private Helpers =====
 
     private async Task<string> EvaluateJavaScriptAsync(string script)
@@ -259,5 +288,11 @@ public class MapService : IMapService
     {
         public double Lat { get; set; }
         public double Lng { get; set; }
+    }
+
+    private class MarkerCountResult
+    {
+        public int Users { get; set; }
+        public int Assistants { get; set; }
     }
 }
