@@ -143,7 +143,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Naver Map</title>
     <!-- Naver Maps API v3 (2025) - ncpKeyId parameter -->
-    <script src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=YOUR_NAVER_CLIENT_ID_HERE"></script>
+    <script src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=a5r744p216"></script>
     <style>
         body, html {
             margin: 0;

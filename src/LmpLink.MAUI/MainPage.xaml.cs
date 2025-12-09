@@ -104,10 +104,10 @@ public partial class MainPage : ContentPage
         {
             // Draw circle around selected user
             var user = _viewModel.SelectedUser;
-            await _mapService.DrawCircleAsync(user.Lat, user.Lng, _viewModel.CurrentRadius);
+            await _mapService.DrawCircleAsync(user.Latitude, user.Longitude, _viewModel.CurrentRadius);
 
             // Set map center to selected user
-            await _mapService.SetMapCenterAsync(user.Lat, user.Lng);
+            await _mapService.SetMapCenterAsync(user.Latitude, user.Longitude);
         }
     }
 
@@ -117,7 +117,7 @@ public partial class MainPage : ContentPage
         {
             // Redraw circle with new radius
             var user = _viewModel.SelectedUser;
-            await _mapService.DrawCircleAsync(user.Lat, user.Lng, _viewModel.CurrentRadius);
+            await _mapService.DrawCircleAsync(user.Latitude, user.Longitude, _viewModel.CurrentRadius);
         }
     }
 

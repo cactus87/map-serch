@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ResourceDictionary 
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:converters="clr-namespace:LmpLink.MAUI.Converters">
 
     <!-- Converters -->
-    <InvertedBoolConverter x:Key="InvertedBoolConverter" />
+    <converters:InvertedBoolConverter x:Key="InvertedBoolConverter" />
     
     <!-- Custom Converter: Check if value is not null -->
-    <IsNotNullConverter x:Key="IsNotNullConverter" />
+    <converters:IsNotNullConverter x:Key="IsNotNullConverter" />
 
 </ResourceDictionary>

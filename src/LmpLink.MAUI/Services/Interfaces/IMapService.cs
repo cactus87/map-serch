@@ -7,6 +7,13 @@ namespace LmpLink.MAUI.Services.Interfaces;
 public interface IMapService
 {
     /// <summary>
+    /// Set the WebView reference for JS Interop.
+    /// Must be called before any map operations.
+    /// </summary>
+    /// <param name="webView">WebView instance</param>
+    void SetWebView(WebView webView);
+
+    /// <summary>
     /// Initialize the Naver Map with center coordinates and zoom level.
     /// </summary>
     /// <param name="lat">Latitude (default: 37.6688 for Dobong-gu Office)</param>

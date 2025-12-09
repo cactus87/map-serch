@@ -47,7 +47,7 @@ public class MapService : IMapService
         {
             var type = person.Type == PersonType.User ? "user" : "assistant";
             var name = EscapeJavaScript(person.Name);
-            var script = $"window.addMarker({person.Id}, '{type}', {person.Lat}, {person.Lng}, '{name}');";
+            var script = $"window.addMarker({person.Id}, '{type}', {person.Latitude}, {person.Longitude}, '{name}');";
             await EvaluateJavaScriptAsync(script);
         }
         catch (Exception ex)
@@ -147,7 +147,7 @@ public class MapService : IMapService
         }
         catch (Exception ex)
         {
-            throw new InvalidOperationException($"Failed to clear all markers: {ex.message}", ex);
+            throw new InvalidOperationException($"Failed to clear all markers: {ex.Message}", ex);
         }
     }
 
