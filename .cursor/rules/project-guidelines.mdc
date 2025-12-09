@@ -5,23 +5,27 @@ alwaysApply: true
 ---
 
 ## 목적
-- 네이버 지도 기반 Blazor Server MVP: 지도 반경 검색으로 매칭 시간 단축 검증 (엑셀 30분 → 지도 클릭 3분).
+- 네이버 지도 기반 .NET MAUI MVP: 지도 반경 검색으로 매칭 시간 단축 검증 (엑셀 30분 → 지도 클릭 3분).
 - 대상: Cursor 사용 개발자. 간결하고 실행 가능한 지침 유지.
+- 배포: Windows (MSIX), Android (APK).
 
 ## 범위 및 목표
-- 지도 초기 로딩 5초 이내; 반경 필터 갱신 1초 이내.
-- Phase 4(Day 7) 종료 시 데모 가능 수준 UX 완성.
+- 앱 시작 <2초; 지도 초기 로딩 <3초; 반경 필터 갱신 <500ms.
+- Phase 4(Week 6) 종료 시 데모 가능 수준 UX + 배포 패키지 완성.
 
 ## 기술 스택
-- Blazor Server (.NET 9), MudBlazor UI, Naver Maps JS API v3 (JS Interop).
+- .NET MAUI 9.0 (.NET 9 LTS), C# 13.
+- 아키텍처: MVVM (CommunityToolkit.Mvvm).
+- UI: MAUI Native Controls + Custom XAML Components.
+- 지도: Naver Maps (WebView + JS Interop).
 - 데이터 모델: `Person` + `PersonType` (`User`, `Assistant`).
-- 서비스 등록: `Program.cs`에서 MudBlazor, `MockDataService` 등록.
+- 서비스 등록: `MauiProgram.cs`에서 DI 설정 (Services, ViewModels, Pages).
 
 ## 레이아웃 & UX
-- MainLayout: 좌측 30% (목록/필터) / 우측 70% (지도).
+- MainPage: 좌측 30% (목록/필터 패널) / 우측 70% (지도 WebView).
 - AppBar 타이틀: "LMP-Link MVP".
-- 좌측: MudDataGrid로 이용자/지원사 표시, 거리순 정렬, 반경 필터(1km/3km/전체).
-- 우측: 도봉구청 좌표(37.6688, 127.0471) 중심 네이버 지도.
+- 좌측: CollectionView로 이용자/지원사 표시, 거리순 정렬, 반경 필터(1km/3km/5km/전체).
+- 우측: 도봉구청 좌표(37.6688, 127.0471) 중심 네이버 지도 (WebView + HTML).
 - 마커 스타일: 이용자 → 파란 원, 지원사 → 주황 사각형. 호버/툴팁에 이름+주소 표시.
 
 ## 데이터 & Mock
@@ -60,19 +64,20 @@ alwaysApply: true
 - `window.navermap_authFailure` 함수 정의하여 실패 시 상세 로그 출력
 - 브라우저 Network 탭에서 `maps.js` 요청의 Referer 헤더 확인
 
-## JS Interop 가이드
-- `wwwroot/js/naverMap.js`에 네이버 지도 interop 정의.
-- 네임스페이스 함수 사용: `window.initMap`, `addMarker`, `drawCircle`, `setMarkerVisible`, `clearCircle`.
-- 최소 DTO 전달: `{ id, type, lat, lng, name, address }`.
+## WebView + JS Interop 가이드 (MAUI)
+- MAUI WebView로 네이버 지도 HTML 로드: `Resources/Raw/map.html`.
+- JS → C# 통신: `window.chrome.webview.postMessage()` (Windows), `window.webkit.messageHandlers` (iOS), JavaScript Interface (Android).
+- C# → JS 통신: `WebView.EvaluateJavaScriptAsync("functionName()")`.
+- 최소 DTO 전달: `{ id, type, lat, lng, name, address }` JSON 직렬화.
 - 지도 초기화 시 API 스크립트 중복 로드 방지; 키 누락 시 즉시 실패.
-- `IJSRuntime.InvokeVoidAsync`로 단방향 호출; 반환값 필요 시만 `InvokeAsync<T>` 사용.
 - 빠른 UI 변경 시 JS 측 디바운스 적용.
 
-### Blazor에서 JavaScript 렌더링 주의사항
-- **금지**: Razor 코드 블록 내에서 복잡한 JavaScript 인라인 작성
-- **권장**: JavaScript는 외부 `.js` 파일로 분리
-- Razor 변수를 JS에 전달 시 `@apiKey` 직접 사용 대신 HTML 속성이나 간단한 문자열만 사용
-- 복잡한 JS 로직은 `wwwroot/js/` 파일에 작성 후 interop 호출
+### MAUI WebView 주의사항
+- **금지**: WebView에서 직접 파일 시스템 접근
+- **권장**: HTML/JS/CSS는 `Resources/Raw/` 폴더에 배치, 빌드 액션 `MauiAsset`
+- **Android**: `file:///android_asset/map.html` 경로 사용
+- **Windows**: `ms-appx-web:///Resources/Raw/map.html` 경로 사용
+- Platform별 WebView 초기화 코드는 `#if` 조건부 컴파일로 분리
 
 ## 반경 로직
 - 이용자 마커 클릭 → 해당 위치에 반투명 파란 원(선택된 반경) 그리기.
@@ -92,11 +97,34 @@ alwaysApply: true
 - 정적 데이터 기반 결정적 테스트: 지도 초기화, 마커 개수, 반경 필터 결과, 거리 계산 엣지케이스(거리 0, 사분면 교차).
 - 수동 데모 체크리스트: 지도 로드, 1km/3km/전체 버튼 동작, 이용자 클릭 시 원+그리드 갱신, 성능 예산 충족.
 
+## 작업 진척 관리
+- **단일 파일 진척 추적**: `진척_관리.md`를 메인 진척 관리 문서로 사용.
+- **작업 계획 참조**: 모든 작업은 `작업_일관성_분석_및_통합_계획.md`의 Week-by-Week 계획 참조.
+- **일일 업데이트**: 매일 작업 종료 시 `진척_관리.md`의 일일 로그 & 체크리스트 업데이트.
+- **Cursor AI 활용**: 작업 시작 전 `진척_관리.md`에서 해당 Day의 프롬프트 복사 후 Cursor에 입력.
+- **이슈 추적**: 문제 발생 시 즉시 `진척_관리.md`의 "이슈 & 해결" 테이블에 기록.
+- **주간 회고**: 매주 종료 시 회고 작성 (✅ 잘된 점, ⚠️ 개선점, 🎯 다음 주 계획).
+
 ## Cursor 사용 참고
 - 플랜 파일 직접 수정 금지; TODO는 도구로 업데이트.
 - 편집 시 `apply_patch` 우선; 사용자 변경 되돌리기 금지.
 - 문서는 ASCII 유지; 간결한 불릿; 코드는 early-return 패턴.
+- **작업 시작 전**: `진척_관리.md`에서 오늘 할 작업 확인 후 프롬프트 복사.
+
+## 기존 Blazor 프로젝트 참고
+- **위치**: `MapDemo/` 폴더 (Blazor Server + MudBlazor + Naver Maps)
+- **검증된 로직**: Haversine 거리 계산, 네이버 지도 JS Interop, 필터링 UX
+- **참고 파일**:
+  - `MapDemo/Services/DistanceCalculator.cs` - Haversine 공식 (MAUI에 이미 적용)
+  - `MapDemo/wwwroot/js/naverMap.js` - 네이버 지도 JS 함수 (initMap, addMarker, drawCircle 등)
+  - `MapDemo/Components/Pages/Home.razor` - 필터링 로직 (@code 블록 → MAUI ViewModel 변환 필요)
+  - `MapDemo/Services/MockDataService.cs` - Mock 데이터 좌표 (MAUI 버전이 더 개선됨)
+- **상세 비교**: `Blazor_to_MAUI_참고자료.md` 문서 참조
+- **MAUI 개선점**: 인터페이스 DI, record 타입, MVVM 패턴, 크로스플랫폼
 
 ## 산출물 요약
-- `PLAN.md` (루트): 4개 Phase 일별 마일스톤, 체크리스트, 수락 기준.
+- `PLAN.md` (루트): 4개 Phase 일별 마일스톤, 체크리스트, 수락 기준 (Blazor 버전).
+- `진척_관리.md` (루트): MAUI 프로젝트 일일 작업 로그, 체크리스트, 주간 회고.
+- `작업_일관성_분석_및_통합_계획.md` (루트): Week-by-Week 작업 계획 (MAUI 버전).
+- `Blazor_to_MAUI_참고자료.md` (루트): 기존 Blazor 프로젝트 참고 로직 정리.
 - 본 가이드라인 파일: MVP 빌드 운영 규칙.

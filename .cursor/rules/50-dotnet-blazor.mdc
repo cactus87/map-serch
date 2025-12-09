@@ -1,0 +1,510 @@
+---
+description: ".NET 9, C# 13, Blazor Server & MudBlazor Applications"
+globs:
+  - "**/*.cs"
+  - "**/*.razor"
+  - "**/*.csproj"
+  - "**/Program.cs"
+alwaysApply: false
+priority: 8
+---
+
+# .NET 9 & C# 13 Standards for Blazor Server (2025)
+
+## 🎯 Core Philosophy
+
+1. **Component-Based**: Razor components for UI, Services for logic
+2. **Modern C#**: Use C# 13 features (records, init properties, required keyword)
+3. **Type Safety**: Nullable reference types enabled (#nullable enable)
+4. **Async/Await**: All I/O and long operations are async
+5. **DI Container**: Dependency Injection for all services
+6. **MudBlazor**: Use MudBlazor components for consistent UI
+
+---
+
+## 📁 Project Structure (Blazor Server)
+
+```
+MapDemo/
+├── Program.cs                     # App entry point, DI configuration
+├── appsettings.json               # Configuration
+├── MapDemo.csproj
+│
+├── Components/                    # Razor Components
+│   ├── Layout/
+│   │   ├── MainLayout.razor       # Main layout
+│   │   └── NavMenu.razor          # Navigation menu
+│   ├── Pages/
+│   │   ├── Home.razor             # Home page
+│   │   └── Map.razor              # Map page
+│   └── Shared/
+│       ├── MarkerList.razor       # Reusable components
+│       └── FilterPanel.razor
+│
+├── Models/                        # Data Models
+│   ├── Person.cs
+│   └── PersonType.cs
+│
+├── Services/                      # Business Logic Layer
+│   ├── IMockDataService.cs        # Interface
+│   ├── MockDataService.cs         # Implementation
+│   └── DistanceCalculator.cs      # Haversine calculation
+│
+├── wwwroot/
+│   ├── css/
+│   └── js/
+│       └── naverMap.js            # Naver Maps JS Interop
+│
+└── _Imports.razor                 # Global imports
+```
+
+---
+
+## 🔧 Core Patterns
+
+### Pattern 1: Program.cs with DI Container
+
+```csharp
+// Program.cs
+using MudBlazor.Services;
+
+var builder = WebApplication.CreateBuilder(args);
+
+// Add services
+builder.Services.AddRazorComponents()
+    .AddInteractiveServerComponents();
+
+builder.Services.AddMudServices();
+
+// Register custom services
+builder.Services.AddSingleton<IMockDataService, MockDataService>();
+
+var app = builder.Build();
+
+app.UseStaticFiles();
+app.UseAntiforgery();
+
+app.MapRazorComponents<App>()
+    .AddInteractiveServerRenderMode();
+
+app.Run();
+```
+
+---
+
+### Pattern 2: Model with Nullable Reference Types
+
+```csharp
+// Models/Person.cs
+#nullable enable
+
+namespace MapDemo.Models;
+
+public enum PersonType
+{
+    User,
+    Assistant
+}
+
+public record Person
+{
+    public required int Id { get; init; }
+    public required string Name { get; init; }
+    public required string Address { get; init; }
+    public required double Latitude { get; init; }
+    public required double Longitude { get; init; }
+    public required PersonType Type { get; init; }
+    public string? PhoneNumber { get; init; }
+}
+```
+
+---
+
+### Pattern 3: Service with Interface
+
+```csharp
+// Services/IMockDataService.cs
+#nullable enable
+
+namespace MapDemo.Services;
+
+public interface IMockDataService
+{
+    IReadOnlyList<Person> GetAllPersons();
+    IReadOnlyList<Person> GetUsers();
+    IReadOnlyList<Person> GetAssistants();
+    IReadOnlyList<Person> GetAssistantsInRadius(double centerLat, double centerLng, double radiusKm);
+}
+
+// Services/MockDataService.cs
+#nullable enable
+
+namespace MapDemo.Services;
+
+public class MockDataService : IMockDataService
+{
+    private readonly List<Person> _persons;
+
+    public MockDataService()
+    {
+        _persons = GenerateMockData();
+    }
+
+    public IReadOnlyList<Person> GetAllPersons() => _persons.AsReadOnly();
+
+    public IReadOnlyList<Person> GetUsers() =>
+        _persons.Where(p => p.Type == PersonType.User).ToList().AsReadOnly();
+
+    public IReadOnlyList<Person> GetAssistants() =>
+        _persons.Where(p => p.Type == PersonType.Assistant).ToList().AsReadOnly();
+
+    public IReadOnlyList<Person> GetAssistantsInRadius(
+        double centerLat, 
+        double centerLng, 
+        double radiusKm)
+    {
+        return _persons
+            .Where(p => p.Type == PersonType.Assistant)
+            .Where(p => DistanceCalculator.GetDistanceKm(centerLat, centerLng, p.Latitude, p.Longitude) <= radiusKm)
+            .OrderBy(p => DistanceCalculator.GetDistanceKm(centerLat, centerLng, p.Latitude, p.Longitude))
+            .ToList()
+            .AsReadOnly();
+    }
+
+    private static List<Person> GenerateMockData()
+    {
+        // Fixed mock data - no runtime randomization
+        return new List<Person>
+        {
+            new() { Id = 1, Name = "이용자1", Address = "도봉구 창동", Latitude = 37.6530, Longitude = 127.0470, Type = PersonType.User },
+            // ... more data
+        };
+    }
+}
+```
+
+---
+
+### Pattern 4: Distance Calculator (Haversine)
+
+```csharp
+// Services/DistanceCalculator.cs
+#nullable enable
+
+namespace MapDemo.Services;
+
+public static class DistanceCalculator
+{
+    private const double EarthRadiusKm = 6371.0;
+
+    /// <summary>
+    /// Calculate distance between two coordinates using Haversine formula
+    /// </summary>
+    public static double GetDistanceKm(
+        double lat1, double lon1, 
+        double lat2, double lon2)
+    {
+        var dLat = ToRadians(lat2 - lat1);
+        var dLon = ToRadians(lon2 - lon1);
+
+        var a = Math.Sin(dLat / 2) * Math.Sin(dLat / 2) +
+                Math.Cos(ToRadians(lat1)) * Math.Cos(ToRadians(lat2)) *
+                Math.Sin(dLon / 2) * Math.Sin(dLon / 2);
+
+        var c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
+
+        return Math.Round(EarthRadiusKm * c, 2);
+    }
+
+    private static double ToRadians(double degrees) => degrees * Math.PI / 180;
+}
+```
+
+---
+
+### Pattern 5: Razor Component with MudBlazor
+
+```razor
+@* Components/Pages/Map.razor *@
+@page "/map"
+@using MapDemo.Models
+@using MapDemo.Services
+@inject IMockDataService DataService
+@inject IJSRuntime JS
+
+<MudGrid>
+    @* Left Panel - 30% *@
+    <MudItem xs="12" md="4">
+        <MudPaper Class="pa-4" Elevation="2">
+            <MudText Typo="Typo.h6">필터</MudText>
+            
+            <MudSelect T="double" Label="반경 선택" @bind-Value="_selectedRadius">
+                <MudSelectItem Value="1.0">1km</MudSelectItem>
+                <MudSelectItem Value="3.0">3km</MudSelectItem>
+                <MudSelectItem Value="0.0">전체</MudSelectItem>
+            </MudSelect>
+
+            <MudDataGrid T="Person" Items="@_filteredAssistants" Dense="true">
+                <Columns>
+                    <PropertyColumn Property="x => x.Name" Title="이름" />
+                    <PropertyColumn Property="x => x.Address" Title="주소" />
+                    <TemplateColumn Title="거리">
+                        <CellTemplate>
+                            @GetDistanceText(context.Item)
+                        </CellTemplate>
+                    </TemplateColumn>
+                </Columns>
+            </MudDataGrid>
+        </MudPaper>
+    </MudItem>
+
+    @* Right Panel - 70% *@
+    <MudItem xs="12" md="8">
+        <div id="map" style="width:100%; height:600px;"></div>
+    </MudItem>
+</MudGrid>
+
+@code {
+    private double _selectedRadius = 3.0;
+    private Person? _selectedUser;
+    private List<Person> _filteredAssistants = new();
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await InitializeMapAsync();
+        }
+    }
+
+    private async Task InitializeMapAsync()
+    {
+        var users = DataService.GetUsers();
+        var assistants = DataService.GetAssistants();
+        
+        await JS.InvokeVoidAsync("initMap", 37.6688, 127.0471);
+        
+        foreach (var user in users)
+        {
+            await JS.InvokeVoidAsync("addMarker", new
+            {
+                id = user.Id,
+                type = "user",
+                lat = user.Latitude,
+                lng = user.Longitude,
+                name = user.Name,
+                address = user.Address
+            });
+        }
+        
+        foreach (var assistant in assistants)
+        {
+            await JS.InvokeVoidAsync("addMarker", new
+            {
+                id = assistant.Id,
+                type = "assistant",
+                lat = assistant.Latitude,
+                lng = assistant.Longitude,
+                name = assistant.Name,
+                address = assistant.Address
+            });
+        }
+    }
+
+    private async Task OnUserSelected(Person user)
+    {
+        _selectedUser = user;
+        
+        if (_selectedRadius > 0)
+        {
+            _filteredAssistants = DataService
+                .GetAssistantsInRadius(user.Latitude, user.Longitude, _selectedRadius)
+                .ToList();
+                
+            await JS.InvokeVoidAsync("drawCircle", user.Latitude, user.Longitude, _selectedRadius * 1000);
+        }
+        else
+        {
+            _filteredAssistants = DataService.GetAssistants().ToList();
+            await JS.InvokeVoidAsync("clearCircle");
+        }
+        
+        StateHasChanged();
+    }
+
+    private string GetDistanceText(Person assistant)
+    {
+        if (_selectedUser == null) return "-";
+        
+        var distance = DistanceCalculator.GetDistanceKm(
+            _selectedUser.Latitude, _selectedUser.Longitude,
+            assistant.Latitude, assistant.Longitude);
+            
+        return $"{distance:F2} km";
+    }
+}
+```
+
+---
+
+### Pattern 6: JS Interop for Naver Maps
+
+```javascript
+// wwwroot/js/naverMap.js
+let map = null;
+let markers = {};
+let circle = null;
+
+window.initMap = function(lat, lng) {
+    if (!window.naver || !window.naver.maps) {
+        console.error('Naver Maps API not loaded');
+        return;
+    }
+    
+    map = new naver.maps.Map('map', {
+        center: new naver.maps.LatLng(lat, lng),
+        zoom: 14
+    });
+};
+
+window.addMarker = function(data) {
+    if (!map) return;
+    
+    const position = new naver.maps.LatLng(data.lat, data.lng);
+    const isUser = data.type === 'user';
+    
+    const marker = new naver.maps.Marker({
+        position: position,
+        map: map,
+        icon: {
+            content: isUser 
+                ? '<div style="width:20px;height:20px;background:#2563eb;border-radius:50%;border:2px solid white;"></div>'
+                : '<div style="width:20px;height:20px;background:#f97316;border-radius:4px;border:2px solid white;"></div>',
+            anchor: new naver.maps.Point(10, 10)
+        }
+    });
+    
+    const infoWindow = new naver.maps.InfoWindow({
+        content: `<div style="padding:10px;"><strong>${data.name}</strong><br>${data.address}</div>`
+    });
+    
+    naver.maps.Event.addListener(marker, 'mouseover', () => {
+        infoWindow.open(map, marker);
+    });
+    
+    naver.maps.Event.addListener(marker, 'mouseout', () => {
+        infoWindow.close();
+    });
+    
+    if (isUser) {
+        naver.maps.Event.addListener(marker, 'click', () => {
+            DotNet.invokeMethodAsync('MapDemo', 'OnUserMarkerClicked', data.id);
+        });
+    }
+    
+    markers[data.id] = marker;
+};
+
+window.drawCircle = function(lat, lng, radiusMeters) {
+    if (circle) circle.setMap(null);
+    
+    circle = new naver.maps.Circle({
+        map: map,
+        center: new naver.maps.LatLng(lat, lng),
+        radius: radiusMeters,
+        strokeColor: '#2563eb',
+        strokeOpacity: 0.6,
+        strokeWeight: 2,
+        fillColor: '#2563eb',
+        fillOpacity: 0.1
+    });
+};
+
+window.clearCircle = function() {
+    if (circle) {
+        circle.setMap(null);
+        circle = null;
+    }
+};
+
+window.setMarkerVisible = function(id, visible) {
+    if (markers[id]) {
+        markers[id].setVisible(visible);
+    }
+};
+```
+
+---
+
+## 🚫 Anti-Patterns (NEVER DO THIS)
+
+```csharp
+// ❌ WRONG: No null safety
+public class Person
+{
+    public string Name { get; set; }      // Can be null!
+    public string Address { get; set; }
+}
+
+// ✅ CORRECT: Nullable reference types
+#nullable enable
+
+public record Person
+{
+    public required string Name { get; init; }
+    public required string Address { get; init; }
+    public string? PhoneNumber { get; init; }  // Optional
+}
+```
+
+```csharp
+// ❌ WRONG: Synchronous I/O in Blazor
+protected override void OnInitialized()
+{
+    var data = _service.GetData(); // Blocks rendering!
+}
+
+// ✅ CORRECT: Async
+protected override async Task OnInitializedAsync()
+{
+    var data = await _service.GetDataAsync();
+}
+```
+
+```csharp
+// ❌ WRONG: Direct JS call without null check
+await JS.InvokeVoidAsync("initMap");
+
+// ✅ CORRECT: Check for API availability
+await JS.InvokeVoidAsync("initMap", 37.6688, 127.0471);
+// In JS: if (!window.naver?.maps) return;
+```
+
+---
+
+## ✅ Code Review Checklist
+
+- [ ] Nullable reference types enabled (`#nullable enable`)
+- [ ] All services registered in `Program.cs`
+- [ ] All async methods return `Task` or `Task<T>`
+- [ ] JS Interop uses `IJSRuntime.InvokeVoidAsync` or `InvokeAsync<T>`
+- [ ] MudBlazor components used for UI consistency
+- [ ] Error handling with try-catch
+- [ ] API keys in User Secrets, not hardcoded
+- [ ] Mock data uses fixed values (no runtime random)
+
+---
+
+## 🎓 2025 Features
+
+- ✅ **.NET 9**: Latest features and performance
+- ✅ **C# 13**: Required keyword, init properties, records
+- ✅ **Blazor Server**: Interactive server components
+- ✅ **MudBlazor**: Material Design UI components
+- ✅ **Nullable Reference Types**: null-safety by default
+
+---
+
+**Document Version**: 1.0 (2025-12-09)
+**Framework**: .NET 9 + Blazor Server
+**Status**: Production-ready

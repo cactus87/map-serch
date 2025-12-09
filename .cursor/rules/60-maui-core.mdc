@@ -1,0 +1,678 @@
+---
+description: .NET MAUI 9.0 & C# 13 Standards for LMP-Link Cross-Platform App (Windows + Android)
+globs: 
+  - "**/*.cs"
+  - "**/*.xaml"
+  - "**/*.csproj"
+alwaysApply: false
+priority: 60
+---
+
+# .NET MAUI 9.0 & C# 13 Standards (2025)
+# LMP-Link: Location-based Matching Platform
+
+## 🎯 Core Philosophy
+
+1. **Component-Based Architecture**: MVVM pattern with CommunityToolkit.Mvvm
+2. **Modern C#**: C# 13 features (file-scoped namespaces, record types, global usings)
+3. **Type Safety**: `#nullable enable` in ALL files, no null-forgiving operators
+4. **Async/Await**: All I/O operations async (API calls, file access, DB queries)
+5. **Dependency Injection**: Constructor injection for services, ViewModels, Pages
+6. **Cross-Platform**: Single codebase for Windows (MSIX) + Android (APK)
+
+---
+
+## 📁 MAUI Project Structure
+
+```
+LmpLink.MAUI/
+├── MauiProgram.cs                    # DI + App initialization
+├── App.xaml / App.xaml.cs            # Global resources
+├── AppShell.xaml / AppShell.xaml.cs  # Navigation routes
+│
+├── Views/
+│   ├── Pages/
+│   │   ├── MainPage.xaml / .xaml.cs
+│   │   ├── MapPage.xaml / .xaml.cs
+│   │   ├── MatchingPage.xaml / .xaml.cs
+│   │   └── SettingsPage.xaml / .xaml.cs
+│   └── Controls/
+│       ├── UserCard.xaml / .xaml.cs
+│       └── AssistantCard.xaml / .xaml.cs
+│
+├── ViewModels/
+│   ├── Base/
+│   │   └── BaseViewModel.cs
+│   ├── MainViewModel.cs
+│   ├── MapViewModel.cs
+│   └── MatchingViewModel.cs
+│
+├── Models/
+│   ├── Person.cs
+│   ├── PersonType.cs
+│   ├── Match.cs
+│   └── ApiResponse.cs
+│
+├── Services/
+│   ├── Interfaces/
+│   │   ├── IApiService.cs
+│   │   ├── ILocationService.cs
+│   │   ├── IStorageService.cs
+│   │   └── IPlatformService.cs
+│   └── Implementation/
+│       ├── ApiService.cs
+│       ├── LocationService.cs
+│       ├── StorageService.cs
+│       └── DistanceCalculator.cs
+│
+├── Platforms/
+│   ├── Android/
+│   │   ├── MainActivity.cs
+│   │   └── AndroidPlatformService.cs
+│   └── Windows/
+│       ├── App.xaml / App.xaml.cs
+│       └── WindowsPlatformService.cs
+│
+├── Resources/
+│   ├── Styles/
+│   │   ├── Colors.xaml
+│   │   └── Styles.xaml
+│   └── Images/
+│
+└── Helpers/
+    ├── Converters.cs
+    └── Constants.cs
+```
+
+---
+
+## 🔧 Core Patterns
+
+### Pattern 1: MauiProgram.cs (Full DI Setup)
+
+```csharp
+// MauiProgram.cs
+using Microsoft.Maui;
+using Microsoft.Maui.Hosting;
+using Microsoft.Extensions.DependencyInjection;
+using CommunityToolkit.Mvvm.Messaging;
+using LmpLink.MAUI.Services;
+using LmpLink.MAUI.ViewModels;
+using LmpLink.MAUI.Views;
+
+#nullable enable
+
+namespace LmpLink.MAUI;
+
+/// <summary>
+/// MAUI application configuration and initialization.
+/// Registers services, ViewModels, and Pages for Dependency Injection.
+/// </summary>
+public static class MauiProgram
+{
+    public static MauiApp CreateMauiApp()
+    {
+        var builder = MauiApp.CreateBuilder();
+        
+        builder
+            .UseMauiApp<App>()
+            .ConfigureFonts(fonts =>
+            {
+                fonts.AddFont("Inter-Regular.ttf", "InterRegular");
+                fonts.AddFont("Inter-Bold.ttf", "InterBold");
+            });
+
+        // System Services
+        builder.Services
+            .AddSingleton<IMessenger>(WeakReferenceMessenger.Default);
+
+        // Business Services
+        builder.Services
+            .AddSingleton<IApiService, ApiService>()
+            .AddSingleton<ILocationService, LocationService>()
+            .AddSingleton<IStorageService, StorageService>()
+            .AddSingleton<DistanceCalculator>();
+
+        // Platform-Specific Services
+        #if ANDROID
+        builder.Services.AddSingleton<IPlatformService, Platforms.Android.AndroidPlatformService>();
+        #elif WINDOWS
+        builder.Services.AddSingleton<IPlatformService, Platforms.Windows.WindowsPlatformService>();
+        #endif
+
+        // ViewModels (Singleton)
+        builder.Services
+            .AddSingleton<MainViewModel>()
+            .AddSingleton<MapViewModel>()
+            .AddSingleton<MatchingViewModel>();
+
+        // Pages (Singleton)
+        builder.Services
+            .AddSingleton<MainPage>()
+            .AddSingleton<MapPage>()
+            .AddSingleton<MatchingPage>();
+
+        // Shell Navigation
+        builder.Services.AddSingleton<AppShell>();
+
+        return builder.Build();
+    }
+}
+```
+
+---
+
+### Pattern 2: Model with Nullable Reference Types
+
+```csharp
+// Models/Person.cs
+#nullable enable
+
+namespace LmpLink.MAUI.Models;
+
+/// <summary>
+/// Represents a person (User or Assistant) in the system.
+/// </summary>
+public record Person(
+    int Id,
+    string Name,
+    PersonType Type,
+    double Latitude,
+    double Longitude,
+    string Address,
+    string? Phone = null,
+    string? Gender = null,
+    bool HasVehicle = false
+);
+
+/// <summary>
+/// Person type: User (이용자) or Assistant (지원사).
+/// </summary>
+public enum PersonType
+{
+    User,      // 이용자
+    Assistant  // 지원사
+}
+```
+
+---
+
+### Pattern 3: Service with Interface
+
+```csharp
+// Services/Interfaces/ILocationService.cs
+#nullable enable
+
+namespace LmpLink.MAUI.Services;
+
+/// <summary>
+/// Location-based operations: distance calculation, radius filtering.
+/// </summary>
+public interface ILocationService
+{
+    /// <summary>
+    /// Calculate distance between two points (Haversine formula).
+    /// </summary>
+    double CalculateDistance(double lat1, double lon1, double lat2, double lon2);
+
+    /// <summary>
+    /// Filter persons within a given radius (in kilometers).
+    /// </summary>
+    List<Person> FilterByRadius(Person center, List<Person> candidates, double radiusKm);
+}
+
+// Services/Implementation/LocationService.cs
+#nullable enable
+
+namespace LmpLink.MAUI.Services;
+
+/// <summary>
+/// Location service implementation using Haversine formula.
+/// </summary>
+public class LocationService : ILocationService
+{
+    private const double EarthRadiusKm = 6371.0;
+
+    /// <inheritdoc />
+    public double CalculateDistance(double lat1, double lon1, double lat2, double lon2)
+    {
+        var dLat = ToRadians(lat2 - lat1);
+        var dLon = ToRadians(lon2 - lon1);
+
+        var a = Math.Sin(dLat / 2) * Math.Sin(dLat / 2) +
+                Math.Cos(ToRadians(lat1)) * Math.Cos(ToRadians(lat2)) *
+                Math.Sin(dLon / 2) * Math.Sin(dLon / 2);
+
+        var c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
+        return EarthRadiusKm * c;
+    }
+
+    /// <inheritdoc />
+    public List<Person> FilterByRadius(Person center, List<Person> candidates, double radiusKm)
+    {
+        return candidates
+            .Where(p => CalculateDistance(center.Latitude, center.Longitude, p.Latitude, p.Longitude) <= radiusKm)
+            .ToList();
+    }
+
+    private static double ToRadians(double degrees) => degrees * Math.PI / 180;
+}
+```
+
+---
+
+### Pattern 4: ViewModel (MVVM Toolkit)
+
+```csharp
+// ViewModels/Base/BaseViewModel.cs
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Messaging;
+
+#nullable enable
+
+namespace LmpLink.MAUI.ViewModels;
+
+/// <summary>
+/// Base ViewModel for all pages.
+/// Provides IsLoading, ErrorMessage, and error handling utilities.
+/// </summary>
+public abstract partial class BaseViewModel : ObservableObject
+{
+    [ObservableProperty]
+    private bool isLoading;
+
+    [ObservableProperty]
+    private string? errorMessage;
+
+    [ObservableProperty]
+    private bool hasError;
+
+    protected readonly IMessenger Messenger;
+
+    protected BaseViewModel(IMessenger messenger)
+    {
+        Messenger = messenger;
+    }
+
+    /// <summary>
+    /// Execute async operation with automatic loading/error state management.
+    /// </summary>
+    protected async Task ExecuteAsync(Func<Task> operation)
+    {
+        IsLoading = true;
+        try
+        {
+            await operation();
+            ClearError();
+        }
+        catch (Exception ex)
+        {
+            HandleError(ex);
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    /// <summary>
+    /// Execute async operation with return value.
+    /// </summary>
+    protected async Task<T?> ExecuteAsync<T>(Func<Task<T>> operation)
+    {
+        IsLoading = true;
+        try
+        {
+            var result = await operation();
+            ClearError();
+            return result;
+        }
+        catch (Exception ex)
+        {
+            HandleError(ex);
+            return default;
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private void HandleError(Exception ex)
+    {
+        ErrorMessage = ex.Message;
+        HasError = true;
+        Debug.WriteLine($"[Error] {ex}");
+    }
+
+    private void ClearError()
+    {
+        HasError = false;
+        ErrorMessage = null;
+    }
+}
+
+// ViewModels/MapViewModel.cs
+using CommunityToolkit.Mvvm.Input;
+using LmpLink.MAUI.Services;
+
+#nullable enable
+
+namespace LmpLink.MAUI.ViewModels;
+
+/// <summary>
+/// ViewModel for MapPage: handles map markers, radius filtering, and user selection.
+/// </summary>
+public partial class MapViewModel : BaseViewModel
+{
+    private readonly ILocationService _locationService;
+    private readonly IApiService _apiService;
+
+    [ObservableProperty]
+    private ObservableCollection<Person> users = [];
+
+    [ObservableProperty]
+    private ObservableCollection<Person> assistants = [];
+
+    [ObservableProperty]
+    private Person? selectedUser;
+
+    [ObservableProperty]
+    private double currentRadius = 3.0; // Default: 3km
+
+    public MapViewModel(
+        ILocationService locationService,
+        IApiService apiService,
+        IMessenger messenger)
+        : base(messenger)
+    {
+        _locationService = locationService;
+        _apiService = apiService;
+    }
+
+    /// <summary>
+    /// Load users and assistants from API.
+    /// </summary>
+    [RelayCommand]
+    public async Task LoadData()
+    {
+        await ExecuteAsync(async () =>
+        {
+            var data = await _apiService.GetPersonsAsync();
+            Users = new ObservableCollection<Person>(data.Where(p => p.Type == PersonType.User));
+            Assistants = new ObservableCollection<Person>(data.Where(p => p.Type == PersonType.Assistant));
+        });
+    }
+
+    /// <summary>
+    /// Select a user and filter assistants by radius.
+    /// </summary>
+    [RelayCommand]
+    public void SelectUser(Person user)
+    {
+        SelectedUser = user;
+        FilterAssistantsByRadius();
+    }
+
+    /// <summary>
+    /// Change radius and re-filter assistants.
+    /// </summary>
+    [RelayCommand]
+    public void ChangeRadius(double newRadius)
+    {
+        CurrentRadius = newRadius;
+        if (SelectedUser != null)
+        {
+            FilterAssistantsByRadius();
+        }
+    }
+
+    private void FilterAssistantsByRadius()
+    {
+        if (SelectedUser == null) return;
+
+        var allAssistants = Assistants.ToList();
+        var filtered = _locationService.FilterByRadius(SelectedUser, allAssistants, CurrentRadius);
+        
+        Assistants = new ObservableCollection<Person>(filtered);
+    }
+}
+```
+
+---
+
+### Pattern 5: XAML View with Data Binding
+
+```xml
+<!-- Views/Pages/MapPage.xaml -->
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="LmpLink.MAUI.Views.MapPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    Title="지도">
+
+    <Grid RowDefinitions="Auto,*" RowSpacing="8" Padding="16">
+        <!-- 헤더: 반경 필터 버튼 -->
+        <HorizontalStackLayout Spacing="8">
+            <Button
+                Text="1km"
+                Command="{Binding ChangeRadiusCommand}"
+                CommandParameter="1.0" />
+            <Button
+                Text="3km"
+                Command="{Binding ChangeRadiusCommand}"
+                CommandParameter="3.0" />
+            <Button
+                Text="5km"
+                Command="{Binding ChangeRadiusCommand}"
+                CommandParameter="5.0" />
+            <Button
+                Text="전체"
+                Command="{Binding ChangeRadiusCommand}"
+                CommandParameter="99.0" />
+        </HorizontalStackLayout>
+
+        <!-- 지도 (WebView로 네이버 지도) -->
+        <WebView Grid.Row="1" Source="file:///android_asset/map.html" />
+
+        <!-- 로딩 인디케이터 -->
+        <ActivityIndicator
+            Grid.Row="1"
+            IsRunning="{Binding IsLoading}"
+            IsVisible="{Binding IsLoading}"
+            Color="Blue" />
+    </Grid>
+</ContentPage>
+```
+
+```csharp
+// Views/Pages/MapPage.xaml.cs
+using LmpLink.MAUI.ViewModels;
+
+#nullable enable
+
+namespace LmpLink.MAUI.Views;
+
+public partial class MapPage : ContentPage
+{
+    private readonly MapViewModel _viewModel;
+
+    public MapPage(MapViewModel viewModel)
+    {
+        InitializeComponent();
+        
+        _viewModel = viewModel;
+        BindingContext = _viewModel;
+    }
+
+    protected override async void OnAppearing()
+    {
+        base.OnAppearing();
+        
+        if (_viewModel.LoadDataCommand.CanExecute(null))
+        {
+            await _viewModel.LoadDataCommand.ExecuteAsync(null);
+        }
+    }
+}
+```
+
+---
+
+### Pattern 6: Platform-Specific Code
+
+```csharp
+// Services/Interfaces/IPlatformService.cs
+#nullable enable
+
+namespace LmpLink.MAUI.Services;
+
+/// <summary>
+/// Platform-specific operations (Android, Windows).
+/// </summary>
+public interface IPlatformService
+{
+    /// <summary>
+    /// Get device unique identifier.
+    /// </summary>
+    string GetDeviceId();
+
+    /// <summary>
+    /// Request runtime permission (Android 6.0+).
+    /// </summary>
+    Task<PermissionStatus> RequestLocationPermissionAsync();
+}
+
+// Platforms/Android/AndroidPlatformService.cs
+#if ANDROID
+using Android.Content.PM;
+
+#nullable enable
+
+namespace LmpLink.MAUI.Platforms.Android;
+
+public class AndroidPlatformService : IPlatformService
+{
+    public string GetDeviceId()
+    {
+        return Android.OS.Build.Serial ?? "unknown";
+    }
+
+    public async Task<PermissionStatus> RequestLocationPermissionAsync()
+    {
+        try
+        {
+            var status = await Permissions.CheckStatusAsync<Permissions.LocationWhenInUse>();
+            if (status != PermissionStatus.Granted)
+            {
+                status = await Permissions.RequestAsync<Permissions.LocationWhenInUse>();
+            }
+            return status;
+        }
+        catch
+        {
+            return PermissionStatus.Denied;
+        }
+    }
+}
+#endif
+
+// Platforms/Windows/WindowsPlatformService.cs
+#if WINDOWS
+#nullable enable
+
+namespace LmpLink.MAUI.Platforms.Windows;
+
+public class WindowsPlatformService : IPlatformService
+{
+    public string GetDeviceId()
+    {
+        return Environment.MachineName;
+    }
+
+    public async Task<PermissionStatus> RequestLocationPermissionAsync()
+    {
+        // Windows always grants location permission for desktop apps
+        return await Task.FromResult(PermissionStatus.Granted);
+    }
+}
+#endif
+```
+
+---
+
+## 🚫 Anti-Patterns
+
+```csharp
+// ❌ WRONG: UI code in ViewModel
+public class BadViewModel
+{
+    public void ShowAlert(string message)
+    {
+        Application.Current?.MainPage?.DisplayAlert("Alert", message, "OK");
+    }
+}
+
+// ✅ CORRECT: Use Messenger pattern
+public class GoodViewModel
+{
+    private readonly IMessenger _messenger;
+    
+    public void NotifyUser(string message)
+    {
+        _messenger.Send(new AlertMessage(message));
+    }
+}
+```
+
+```csharp
+// ❌ WRONG: Mixing platform code in shared code
+public class BadService
+{
+    public void DoSomething()
+    {
+        #if ANDROID
+        // Android code
+        #elif WINDOWS
+        // Windows code
+        #endif
+    }
+}
+
+// ✅ CORRECT: Interface + platform-specific implementation
+public interface IPlatformService { void DoSomething(); }
+```
+
+---
+
+## ✅ Code Review Checklist
+
+- [ ] `#nullable enable` at the top of every `.cs` file
+- [ ] All ViewModels inherit from `BaseViewModel`
+- [ ] All async methods use `Task`/`Task<T>` return type
+- [ ] Services registered in `MauiProgram.cs`
+- [ ] ViewModels use `[RelayCommand]` for button commands
+- [ ] XAML bindings use `{Binding PropertyName}` syntax
+- [ ] Platform-specific code uses `#if` or `IPlatformService` interface
+- [ ] No hardcoded secrets (use Environment Variables or Secure Storage)
+- [ ] All public APIs have XML documentation comments (`/// <summary>`)
+
+---
+
+## 📚 2025 MAUI Features
+
+✅ **.NET 9 LTS** - Long-term support until 2027  
+✅ **MAUI 9.0** - Latest UI controls and performance improvements  
+✅ **C# 13** - File-scoped namespaces, record types, global usings  
+✅ **CommunityToolkit.Mvvm** - Source generators for MVVM boilerplate  
+✅ **Hot Reload** - Fast development cycle  
+
+---
+
+**Document Version**: 1.0 (2025-12-09)  
+**Frameworks**: .NET 9 LTS, MAUI 9.0, C# 13  
+**Project**: LMP-Link (Location-based Matching Platform)  
+**Platforms**: Windows (MSIX), Android (APK)  
+**Status**: Production-ready
+

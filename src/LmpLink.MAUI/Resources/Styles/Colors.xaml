@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ResourceDictionary 
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
+
+    <!-- Dark Theme: Professional Modern HUD -->
+    
+    <!-- Background Colors -->
+    <Color x:Key="BackgroundDeepNavy">#111827</Color>
+    <Color x:Key="SurfaceDarkGray">#1F2937</Color>
+
+    <!-- Text Colors (Dark Theme) -->
+    <Color x:Key="TextPrimary">#F9FAFB</Color>
+    <Color x:Key="TextSecondary">#9CA3AF</Color>
+    <Color x:Key="TextTertiary">#6B7280</Color>
+
+    <!-- Action Colors -->
+    <Color x:Key="PrimaryCTA">#2DD4BF</Color>
+    <Color x:Key="UserMarker">#3B82F6</Color>
+    <Color x:Key="AssistantMarker">#F97316</Color>
+
+    <!-- Feedback Colors -->
+    <Color x:Key="Success">#10B981</Color>
+    <Color x:Key="Warning">#FBBF24</Color>
+    <Color x:Key="Error">#EF4444</Color>
+
+    <!-- Legacy Colors (for compatibility) -->
+    <Color x:Key="Primary">#0066CC</Color>
+    <Color x:Key="Secondary">#FF9500</Color>
+    <Color x:Key="Tertiary">#2E7D32</Color>
+    
+    <Color x:Key="White">White</Color>
+    <Color x:Key="Black">Black</Color>
+    <Color x:Key="Gray100">#F5F5F5</Color>
+    <Color x:Key="Gray200">#EEEEEE</Color>
+    <Color x:Key="Gray300">#E0E0E0</Color>
+    <Color x:Key="Gray400">#BDBDBD</Color>
+    <Color x:Key="Gray500">#9E9E9E</Color>
+    <Color x:Key="Gray600">#757575</Color>
+    <Color x:Key="Gray900">#212121</Color>
+
+</ResourceDictionary>
+
