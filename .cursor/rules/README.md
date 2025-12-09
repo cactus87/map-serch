@@ -180,3 +180,5 @@ Ctrl + Shift + P → Reload Window
 **상태**: ✅ 적용 완료
 
 
+
+

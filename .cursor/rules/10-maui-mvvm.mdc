@@ -92,3 +92,5 @@ partial void OnUserNameChanged(string value)
 **참고**: MAUI_개발_가이드.md Section 9.5 (CommunityToolkit.Mvvm 타입 검증)
 
 
+
+
