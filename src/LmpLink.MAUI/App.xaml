@@ -10,10 +10,11 @@
                 <ResourceDictionary Source="Resources/Styles/Colors.xaml" />
                 <ResourceDictionary Source="Resources/Styles/Styles.xaml" />
             </ResourceDictionary.MergedDictionaries>
-            
+
             <!-- Converters -->
             <converters:InvertedBoolConverter x:Key="InvertedBoolConverter" />
             <converters:IsNotNullConverter x:Key="IsNotNullConverter" />
+            <converters:CenterModeToColorConverter x:Key="CenterModeToColorConverter" />
         </ResourceDictionary>
     </Application.Resources>
 </Application>

@@ -75,4 +75,10 @@ public interface IMapService
     /// <param name="lat">Latitude</param>
     /// <param name="lng">Longitude</param>
     Task SetMapCenterAsync(double lat, double lng);
+
+    /// <summary>
+    /// Focus on a marker (center map + zoom + open InfoWindow).
+    /// </summary>
+    /// <param name="personId">Person ID</param>
+    Task FocusMarkerAsync(int personId);
 }

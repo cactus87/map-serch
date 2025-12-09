@@ -218,6 +218,30 @@
             }
         }
         
+        // Focus on marker with highlight
+        function focusMarker(markerId) {
+            try {
+                const marker = markers[markerId];
+                if (!marker) {
+                    console.error(`Marker ${markerId} not found`);
+                    return false;
+                }
+                
+                // Move map center to marker
+                map.setCenter(marker.getPosition());
+                map.setZoom(15); // Zoom in
+                
+                // Trigger click event to open InfoWindow
+                naver.maps.Event.trigger(marker, 'click');
+                
+                console.log(`✨ Focused on marker ${markerId}`);
+                return true;
+            } catch (error) {
+                console.error('Focus marker failed:', error);
+                return false;
+            }
+        }
+        
         // Initialize on page load
         window.addEventListener('load', function() {
             console.log('Page loaded, initializing map...');

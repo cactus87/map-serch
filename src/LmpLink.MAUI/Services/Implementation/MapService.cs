@@ -198,6 +198,23 @@ public class MapService : IMapService
         }
     }
 
+    /// <inheritdoc />
+    public async Task FocusMarkerAsync(int personId)
+    {
+        ThrowIfWebViewNotSet();
+        ThrowIfMapNotInitialized();
+
+        try
+        {
+            var script = $"window.focusMarker({personId});";
+            await EvaluateJavaScriptAsync(script);
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException($"Failed to focus marker {personId}: {ex.Message}", ex);
+        }
+    }
+
     // ===== Private Helpers =====
 
     private async Task<string> EvaluateJavaScriptAsync(string script)

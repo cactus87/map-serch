@@ -11,7 +11,7 @@
     <Grid ColumnDefinitions="3*,7*">
         
         <!-- Left Panel (30%): User List & Controls -->
-        <Grid Grid.Column="0" RowDefinitions="Auto,Auto,Auto,Auto,*" Padding="10" BackgroundColor="{StaticResource SurfaceDarkGray}">
+        <Grid Grid.Column="0" RowDefinitions="Auto,Auto,Auto,Auto,Auto,*" Padding="10" BackgroundColor="{StaticResource SurfaceDarkGray}">
             
             <!-- Title -->
             <Label 
@@ -21,8 +21,28 @@
                 TextColor="{StaticResource PrimaryCTA}"
                 Margin="0,10,0,10" />
 
+            <!-- Center Mode Toggle -->
+            <Grid Grid.Row="1" ColumnDefinitions="*,*" ColumnSpacing="8" Margin="0,0,0,10">
+                <Button 
+                    Grid.Column="0"
+                    Text="이용자 중심"
+                    Command="{Binding ToggleCenterModeCommand}"
+                    BackgroundColor="{Binding CurrentCenterMode, Converter={StaticResource CenterModeToColorConverter}, ConverterParameter=User}"
+                    TextColor="White"
+                    FontSize="14"
+                    Padding="10,8" />
+                <Button 
+                    Grid.Column="1"
+                    Text="지원사 중심"
+                    Command="{Binding ToggleCenterModeCommand}"
+                    BackgroundColor="{Binding CurrentCenterMode, Converter={StaticResource CenterModeToColorConverter}, ConverterParameter=Assistant}"
+                    TextColor="White"
+                    FontSize="14"
+                    Padding="10,8" />
+            </Grid>
+
             <!-- Radius Filter Buttons -->
-            <VerticalStackLayout Grid.Row="1" Spacing="10" Margin="0,0,0,10">
+            <VerticalStackLayout Grid.Row="2" Spacing="10" Margin="0,0,0,10">
                 <Label 
                     Text="반경 필터"
                     Style="{StaticResource SmallText}"
@@ -66,7 +86,7 @@
 
             <!-- Filter Status -->
             <Frame 
-                Grid.Row="2"
+                Grid.Row="3"
                 BackgroundColor="{StaticResource PrimaryCTA}"
                 CornerRadius="8"
                 Padding="10"
@@ -82,7 +102,7 @@
 
             <!-- Users CollectionView -->
             <CollectionView
-                Grid.Row="3"
+                Grid.Row="4"
                 ItemsSource="{Binding Users}"
                 SelectionMode="Single"
                 SelectedItem="{Binding SelectedUser}"
@@ -137,7 +157,7 @@
 
             <!-- Assistants CollectionView -->
             <CollectionView
-                Grid.Row="4"
+                Grid.Row="5"
                 ItemsSource="{Binding FilteredAssistants}"
                 BackgroundColor="{StaticResource BackgroundDeepNavy}">
                 <CollectionView.Header>
@@ -156,6 +176,11 @@
                             BorderColor="{StaticResource TextTertiary}"
                             BackgroundColor="{StaticResource SurfaceDarkGray}"
                             HasShadow="True">
+                            <Frame.GestureRecognizers>
+                                <TapGestureRecognizer 
+                                    Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MapViewModel}}, Path=SelectAssistantCommand}"
+                                    CommandParameter="{Binding}" />
+                            </Frame.GestureRecognizers>
                             <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="Auto,*,Auto">
                                 <!-- Orange Square Icon (Assistant Marker) -->
                                 <BoxView 
@@ -212,6 +237,38 @@
                 x:Name="MapWebView"
                 BackgroundColor="{StaticResource SurfaceDarkGray}"
                 Source="map.html" />
+
+            <!-- Info Overlay (Right Bottom) -->
+            <Frame 
+                HorizontalOptions="End"
+                VerticalOptions="End"
+                Margin="20"
+                Padding="15"
+                BackgroundColor="#CC000000"
+                CornerRadius="8"
+                BorderColor="Transparent"
+                HasShadow="True">
+                <VerticalStackLayout Spacing="8">
+                    <Label 
+                        Text="{Binding CurrentCenterMode, StringFormat='모드: {0}'}" 
+                        Style="{StaticResource SmallText}" 
+                        FontAttributes="Bold"
+                        TextColor="White" />
+                    <Label 
+                        Text="{Binding CurrentRadius, StringFormat='반경: {0}km'}" 
+                        Style="{StaticResource SmallText}" 
+                        TextColor="#CCCCCC" />
+                    <BoxView HeightRequest="1" Color="#444444" Margin="0,5" />
+                    <Label 
+                        Text="{Binding UsersInRadius, StringFormat='이용자: {0}명'}" 
+                        Style="{StaticResource SmallText}" 
+                        TextColor="#3B82F6" />
+                    <Label 
+                        Text="{Binding AssistantsInRadius, StringFormat='지원사: {0}명'}" 
+                        Style="{StaticResource SmallText}" 
+                        TextColor="#F97316" />
+                </VerticalStackLayout>
+            </Frame>
 
             <!-- Loading Overlay -->
             <ActivityIndicator

@@ -5,6 +5,15 @@ using LmpLink.MAUI.ViewModels.Base;
 namespace LmpLink.MAUI.ViewModels;
 
 /// <summary>
+/// Center mode for filtering: User-centric or Assistant-centric.
+/// </summary>
+public enum CenterMode
+{
+    User,      // 이용자 중심 - 이용자 선택 시 활동지원사 필터링
+    Assistant  // 활동지원사 중심 - 활동지원사 선택 시 이용자 필터링
+}
+
+/// <summary>
 /// ViewModel for the main map page.
 /// Manages users, assistants, filtering by radius.
 /// 
@@ -23,6 +32,9 @@ public partial class MapViewModel : BaseViewModel
     // --- Observable Properties ---
 
     [ObservableProperty]
+    private CenterMode _currentCenterMode = CenterMode.User; // Default: User-centric
+
+    [ObservableProperty]
     private ObservableCollection<Person> _users = new();
 
     [ObservableProperty]
@@ -32,13 +44,25 @@ public partial class MapViewModel : BaseViewModel
     private ObservableCollection<Person> _filteredAssistants = new();
 
     [ObservableProperty]
+    private ObservableCollection<Person> _filteredUsers = new(); // For Assistant-centric mode
+
+    [ObservableProperty]
     private Person? _selectedUser;
+
+    [ObservableProperty]
+    private Person? _selectedAssistant;
 
     [ObservableProperty]
     private double _currentRadius = 3.0; // Default 3km
 
     [ObservableProperty]
     private string _filterStatusText = "전체 보기";
+
+    [ObservableProperty]
+    private int _usersInRadius; // For map overlay
+
+    [ObservableProperty]
+    private int _assistantsInRadius; // For map overlay
 
     // --- Constructor ---
 
@@ -73,18 +97,59 @@ public partial class MapViewModel : BaseViewModel
     }
 
     /// <summary>
+    /// Toggle between User-centric and Assistant-centric mode.
+    /// </summary>
+    [RelayCommand]
+    private void ToggleCenterMode()
+    {
+        CurrentCenterMode = CurrentCenterMode == CenterMode.User 
+            ? CenterMode.Assistant 
+            : CenterMode.User;
+
+        // Clear selections when switching mode
+        if (CurrentCenterMode == CenterMode.User)
+        {
+            SelectedAssistant = null;
+            FilteredUsers = new ObservableCollection<Person>(Users);
+        }
+        else
+        {
+            SelectedUser = null;
+            FilteredAssistants = new ObservableCollection<Person>(Assistants);
+        }
+
+        UpdateFilterStatusText();
+    }
+
+    /// <summary>
     /// Select a user (e.g., from marker click or list tap).
-    /// Automatically filters assistants by current radius.
+    /// Behavior depends on current center mode.
     /// </summary>
     [RelayCommand]
     private void SelectUser(Person? user)
     {
         SelectedUser = user;
 
-        if (SelectedUser != null)
+        if (SelectedUser != null && CurrentCenterMode == CenterMode.User)
         {
-            // Filter assistants by current radius
+            // User-centric mode: Filter assistants by radius
             FilterAssistantsByRadius();
+        }
+    }
+
+    /// <summary>
+    /// Select an assistant (e.g., from marker click or list tap).
+    /// Behavior depends on current center mode.
+    /// </summary>
+    [RelayCommand]
+    private void SelectAssistant(Person? assistant)
+    {
+        SelectedAssistant = assistant;
+
+        if (SelectedAssistant != null && CurrentCenterMode == CenterMode.Assistant)
+        {
+            // Assistant-centric mode: Filter users by radius
+            FilterUsersByRadius();
         }
     }
 
@@ -96,30 +161,43 @@ public partial class MapViewModel : BaseViewModel
     {
         CurrentRadius = radiusKm;
 
-        if (SelectedUser != null)
+        if (CurrentCenterMode == CenterMode.User && SelectedUser != null)
         {
             FilterAssistantsByRadius();
         }
+        else if (CurrentCenterMode == CenterMode.Assistant && SelectedAssistant != null)
+        {
+            FilterUsersByRadius();
+        }
         else
         {
-            // No user selected, select first user automatically
-            var firstUser = Users.FirstOrDefault();
-            if (firstUser != null)
+            // No selection, select first person automatically
+            if (CurrentCenterMode == CenterMode.User)
             {
-                SelectUser(firstUser);
+                var firstUser = Users.FirstOrDefault();
+                if (firstUser != null) SelectUser(firstUser);
+            }
+            else
+            {
+                var firstAssistant = Assistants.FirstOrDefault();
+                if (firstAssistant != null) SelectAssistant(firstAssistant);
             }
         }
     }
 
     /// <summary>
-    /// Show all assistants (clear filter).
+    /// Show all persons (clear filter).
     /// </summary>
     [RelayCommand]
     private void ShowAll()
     {
         CurrentRadius = 0; // 0 = show all
         SelectedUser = null;
+        SelectedAssistant = null;
         FilteredAssistants = new ObservableCollection<Person>(Assistants);
+        FilteredUsers = new ObservableCollection<Person>(Users);
+        UsersInRadius = Users.Count;
+        AssistantsInRadius = Assistants.Count;
         UpdateFilterStatusText();
     }
 
@@ -134,6 +212,7 @@ public partial class MapViewModel : BaseViewModel
         if (SelectedUser == null)
         {
             FilteredAssistants = new ObservableCollection<Person>(Assistants);
+            AssistantsInRadius = Assistants.Count;
             UpdateFilterStatusText();
             return;
         }
@@ -142,6 +221,7 @@ public partial class MapViewModel : BaseViewModel
         {
             // Show all
             FilteredAssistants = new ObservableCollection<Person>(Assistants);
+            AssistantsInRadius = Assistants.Count;
         }
         else
         {
@@ -153,8 +233,48 @@ public partial class MapViewModel : BaseViewModel
             );
 
             FilteredAssistants = new ObservableCollection<Person>(filtered);
+            AssistantsInRadius = filtered.Count;
         }
 
+        UsersInRadius = 1; // Current selected user
+        UpdateFilterStatusText();
+    }
+
+    /// <summary>
+    /// Filter users by current radius from selected assistant.
+    /// Sorts by distance (ascending).
+    /// (Reverse filtering for Assistant-centric mode)
+    /// </summary>
+    private void FilterUsersByRadius()
+    {
+        if (SelectedAssistant == null)
+        {
+            FilteredUsers = new ObservableCollection<Person>(Users);
+            UsersInRadius = Users.Count;
+            UpdateFilterStatusText();
+            return;
+        }
+
+        if (CurrentRadius <= 0)
+        {
+            // Show all
+            FilteredUsers = new ObservableCollection<Person>(Users);
+            UsersInRadius = Users.Count;
+        }
+        else
+        {
+            // Filter by radius (reverse: Assistant → Users)
+            var filtered = _locationService.FilterByRadius(
+                SelectedAssistant,
+                Users.ToList(),
+                CurrentRadius
+            );
+
+            FilteredUsers = new ObservableCollection<Person>(filtered);
+            UsersInRadius = filtered.Count;
+        }
+
+        AssistantsInRadius = 1; // Current selected assistant
         UpdateFilterStatusText();
     }
 
@@ -163,17 +283,29 @@ public partial class MapViewModel : BaseViewModel
     /// </summary>
     private void UpdateFilterStatusText()
     {
-        if (SelectedUser == null)
+        if (CurrentCenterMode == CenterMode.User)
         {
-            FilterStatusText = $"전체 {FilteredAssistants.Count}명";
-        }
-        else if (CurrentRadius <= 0)
-        {
-            FilterStatusText = $"전체 {FilteredAssistants.Count}명";
+            // User-centric mode
+            if (SelectedUser == null || CurrentRadius <= 0)
+            {
+                FilterStatusText = $"전체 {FilteredAssistants.Count}명";
+            }
+            else
+            {
+                FilterStatusText = $"{CurrentRadius}km 내 {FilteredAssistants.Count}명";
+            }
         }
         else
         {
-            FilterStatusText = $"{CurrentRadius}km 내 {FilteredAssistants.Count}명";
+            // Assistant-centric mode
+            if (SelectedAssistant == null || CurrentRadius <= 0)
+            {
+                FilterStatusText = $"전체 {FilteredUsers.Count}명";
+            }
+            else
+            {
+                FilterStatusText = $"{CurrentRadius}km 내 {FilteredUsers.Count}명";
+            }
         }
     }
 }

@@ -145,12 +145,20 @@ public partial class MainPage : ContentPage
                     await HandleSelectedUserChanged();
                     break;
 
+                case nameof(MapViewModel.SelectedAssistant):
+                    await HandleSelectedAssistantChanged();
+                    break;
+
                 case nameof(MapViewModel.CurrentRadius):
                     await HandleRadiusChanged();
                     break;
 
                 case nameof(MapViewModel.FilteredAssistants):
                     await HandleFilteredAssistantsChanged();
+                    break;
+
+                case nameof(MapViewModel.FilteredUsers):
+                    await HandleFilteredUsersChanged();
                     break;
             }
         }
@@ -172,12 +180,41 @@ public partial class MainPage : ContentPage
         }
         else
         {
-            // Draw circle around selected user
             var user = _viewModel.SelectedUser;
-            await _mapService.DrawCircleAsync(user.Latitude, user.Longitude, _viewModel.CurrentRadius);
+            
+            // Focus on user marker
+            await _mapService.FocusMarkerAsync(user.Id);
 
-            // Set map center to selected user
-            await _mapService.SetMapCenterAsync(user.Latitude, user.Longitude);
+            // Draw circle if User-centric mode
+            if (_viewModel.CurrentCenterMode == CenterMode.User)
+            {
+                await _mapService.DrawCircleAsync(user.Latitude, user.Longitude, _viewModel.CurrentRadius);
+            }
+        }
+    }
+
+    private async Task HandleSelectedAssistantChanged()
+    {
+        if (_viewModel == null || _mapService == null) return;
+
+        if (_viewModel.SelectedAssistant == null)
+        {
+            // Clear circle if no assistant selected
+            await _mapService.ClearCircleAsync();
+            await _mapService.ShowAllMarkersAsync();
+        }
+        else
+        {
+            var assistant = _viewModel.SelectedAssistant;
+            
+            // Focus on assistant marker
+            await _mapService.FocusMarkerAsync(assistant.Id);
+
+            // Draw circle if Assistant-centric mode
+            if (_viewModel.CurrentCenterMode == CenterMode.Assistant)
+            {
+                await _mapService.DrawCircleAsync(assistant.Latitude, assistant.Longitude, _viewModel.CurrentRadius);
+            }
         }
     }
 
@@ -185,11 +222,17 @@ public partial class MainPage : ContentPage
     {
         if (_viewModel == null || _mapService == null) return;
 
-        if (_viewModel.SelectedUser != null)
+        if (_viewModel.CurrentCenterMode == CenterMode.User && _viewModel.SelectedUser != null)
         {
-            // Redraw circle with new radius
+            // Redraw circle with new radius (User-centric)
             var user = _viewModel.SelectedUser;
             await _mapService.DrawCircleAsync(user.Latitude, user.Longitude, _viewModel.CurrentRadius);
+        }
+        else if (_viewModel.CurrentCenterMode == CenterMode.Assistant && _viewModel.SelectedAssistant != null)
+        {
+            // Redraw circle with new radius (Assistant-centric)
+            var assistant = _viewModel.SelectedAssistant;
+            await _mapService.DrawCircleAsync(assistant.Latitude, assistant.Longitude, _viewModel.CurrentRadius);
         }
     }
 
@@ -197,19 +240,47 @@ public partial class MainPage : ContentPage
     {
         if (_viewModel == null || _mapService == null) return;
 
-        // Update marker visibility based on filtered results
-        var filteredIds = _viewModel.FilteredAssistants.Select(a => a.Id).ToHashSet();
-
-        foreach (var assistant in _viewModel.Assistants)
+        // Only filter markers if in User-centric mode
+        if (_viewModel.CurrentCenterMode == CenterMode.User)
         {
-            var isVisible = filteredIds.Contains(assistant.Id);
-            await _mapService.SetMarkerVisibleAsync(assistant.Id, isVisible);
+            // Update marker visibility based on filtered results
+            var filteredIds = _viewModel.FilteredAssistants.Select(a => a.Id).ToHashSet();
+
+            foreach (var assistant in _viewModel.Assistants)
+            {
+                var isVisible = filteredIds.Contains(assistant.Id);
+                await _mapService.SetMarkerVisibleAsync(assistant.Id, isVisible);
+            }
+
+            // Always show user markers
+            foreach (var user in _viewModel.Users)
+            {
+                await _mapService.SetMarkerVisibleAsync(user.Id, true);
+            }
         }
+    }
 
-        // Always show user markers
-        foreach (var user in _viewModel.Users)
+    private async Task HandleFilteredUsersChanged()
+    {
+        if (_viewModel == null || _mapService == null) return;
+
+        // Only filter markers if in Assistant-centric mode
+        if (_viewModel.CurrentCenterMode == CenterMode.Assistant)
         {
-            await _mapService.SetMarkerVisibleAsync(user.Id, true);
+            // Update marker visibility based on filtered results
+            var filteredIds = _viewModel.FilteredUsers.Select(u => u.Id).ToHashSet();
+
+            foreach (var user in _viewModel.Users)
+            {
+                var isVisible = filteredIds.Contains(user.Id);
+                await _mapService.SetMarkerVisibleAsync(user.Id, isVisible);
+            }
+
+            // Always show assistant markers
+            foreach (var assistant in _viewModel.Assistants)
+            {
+                await _mapService.SetMarkerVisibleAsync(assistant.Id, true);
+            }
         }
     }
 
