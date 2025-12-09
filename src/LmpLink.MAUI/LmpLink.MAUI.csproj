@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net9.0-windows10.0.19041.0</TargetFrameworks>
+    <TargetFrameworks>net10.0-windows10.0.19041.0</TargetFrameworks>
     <OutputType>WinExe</OutputType>
     <RootNamespace>LmpLink.MAUI</RootNamespace>
     <UseMaui>true</UseMaui>
@@ -46,9 +46,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Maui.Controls" Version="9.0.0" />
-    <PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="9.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.0" />
+    <PackageReference Include="Microsoft.Maui.Controls" Version="10.0.0" />
+    <PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="10.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.0" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
   </ItemGroup>
 
