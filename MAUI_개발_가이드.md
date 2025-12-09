@@ -1,7 +1,7 @@
 # LMP-Link MAUI 개발 가이드 (2025)
 
 **프로젝트**: LMP-Link - Location-based Matching Platform  
-**기술 스택**: .NET MAUI 9.0, C# 13, MVVM Pattern  
+**기술 스택**: .NET MAUI 10.0, C# 13, MVVM Pattern  
 **플랫폼**: Windows (MSIX) + Android (APK)  
 **개발 기간**: 4-6주 (1인 개발자)
 
@@ -17,6 +17,7 @@
 6. [네이버 지도 연동](#6-네이버-지도-연동)
 7. [배포 준비](#7-배포-준비)
 8. [트러블슈팅](#8-트러블슈팅)
+9. [⭐ 핵심 패턴 & 주의사항](#9-핵심-패턴--주의사항) ← **NEW!**
 
 ---
 
@@ -813,10 +814,385 @@ MVVM 패턴과 DI 원칙 유지해줘.
 - `PRD.md` - 요구사항 정의서
 - `개발_로드맵.md` - 상세 개발 일정
 - `디자인_시스템.md` - UI/UX 가이드라인
+- `트러블슈팅_MainPage_DI_CommandParameter.md` - **MainPage 즉시 종료 문제 해결 기록**
 
 ---
 
-**작성일**: 2025-12-09  
-**버전**: 1.0  
+## 9. ⭐ 핵심 패턴 & 주의사항
+
+> **중요**: 이 섹션은 실제 트러블슈팅 경험에서 추출한 핵심 패턴입니다.  
+> 2025-12-10 MainPage 즉시 종료 문제 해결 과정에서 학습됨.  
+> 상세 내용: `트러블슈팅_MainPage_DI_CommandParameter.md` 참조
+
+---
+
+### 9.1 XAML CommandParameter 타입 안전성 ⚠️
+
+#### ❌ 잘못된 패턴 (String으로 전달)
+```xml
+<Button 
+    Command="{Binding ChangeRadiusCommand}"
+    CommandParameter="1.0" />  <!-- ❌ System.String으로 전달됨 -->
+```
+
+#### ✅ 올바른 패턴 (명시적 타입 지정)
+```xml
+<Button Command="{Binding ChangeRadiusCommand}">
+    <Button.CommandParameter>
+        <x:Double>1.0</x:Double>  <!-- ✅ System.Double -->
+    </Button.CommandParameter>
+</Button>
+```
+
+#### 타입별 사용법
+```xml
+<!-- 숫자 타입 -->
+<Button.CommandParameter>
+    <x:Double>3.14159</x:Double>
+</Button.CommandParameter>
+
+<Button.CommandParameter>
+    <x:Int32>42</x:Int32>
+</Button.CommandParameter>
+
+<!-- Boolean -->
+<Switch.IsToggled>
+    <x:Boolean>True</x:Boolean>
+</Switch.IsToggled>
+
+<!-- String (따옴표 사용 가능) -->
+<Label Text="Hello World" />
+```
+
+#### 왜 중요한가?
+```csharp
+// ViewModel에서 RelayCommand<T>의 제네릭 타입과 일치해야 함
+[RelayCommand]
+private void ChangeRadius(double radius)  // double 타입
+{
+    CurrentRadius = radius;
+}
+
+// XAML에서 String을 전달하면:
+// → RelayCommand<double>.CanExecute(object parameter) 호출 시
+// → 타입 검증 실패 → ArgumentException 발생 → 앱 크래시
+```
+
+---
+
+### 9.2 MAUI Dependency Injection 패턴 ⚠️
+
+#### ❌ 잘못된 패턴 (생성자 주입 시도)
+```csharp
+// Shell의 DataTemplate은 기본 생성자만 호출 가능
+public MainPage(MapViewModel viewModel, IMapService mapService)  // ❌ 실패
+{
+    InitializeComponent();
+    _viewModel = viewModel;
+    _mapService = mapService;
+}
+```
+
+#### ✅ 올바른 패턴 (IPlatformApplication.Current.Services 사용)
+```csharp
+public partial class MainPage : ContentPage
+{
+    private MapViewModel? _viewModel;  // nullable 필드
+    private IMapService? _mapService;
+
+    public MainPage()  // ✅ 기본 생성자 필수
+    {
+        InitializeComponent();
+
+        // DI 컨테이너에서 서비스 가져오기
+        var services = IPlatformApplication.Current?.Services;
+        if (services == null)
+        {
+            System.Diagnostics.Debug.WriteLine("Services not available");
+            return;
+        }
+
+        _viewModel = services.GetRequiredService<MapViewModel>();
+        _mapService = services.GetRequiredService<IMapService>();
+        BindingContext = _viewModel;
+    }
+}
+```
+
+#### MauiProgram.cs에서 서비스 등록
+```csharp
+public static class MauiProgram
+{
+    public static MauiApp CreateMauiApp()
+    {
+        var builder = MauiApp.CreateBuilder();
+        
+        // Services 등록
+        builder.Services.AddSingleton<IMockDataService, MockDataService>();
+        builder.Services.AddSingleton<ILocationService, LocationService>();
+        builder.Services.AddSingleton<IMapService, MapService>();
+        
+        // ViewModels 등록 (Transient - 매번 새 인스턴스)
+        builder.Services.AddTransient<MapViewModel>();
+        
+        // Pages 등록 (Transient)
+        builder.Services.AddTransient<MainPage>();
+        builder.Services.AddTransient<TestPage>();
+        
+        return builder.Build();
+    }
+}
+```
+
+---
+
+### 9.3 Null-Safe 패턴 필수 ⚠️
+
+#### 필드 선언
+```csharp
+// nullable 타입으로 선언
+private MapViewModel? _viewModel;
+private IMapService? _mapService;
+```
+
+#### 모든 메서드에서 Null 체크
+```csharp
+protected override async void OnAppearing()
+{
+    base.OnAppearing();
+    
+    if (_viewModel == null) return;  // ✅ Early return
+    
+    if (_viewModel.Users.Count == 0)
+    {
+        await _viewModel.LoadDataCommand.ExecuteAsync(null);
+    }
+}
+
+private async Task HandleRadiusChanged()
+{
+    if (_viewModel == null || _mapService == null) return;  // ✅ Null 체크
+    
+    if (_viewModel.SelectedUser != null)
+    {
+        var user = _viewModel.SelectedUser;
+        await _mapService.DrawCircleAsync(user.Latitude, user.Longitude, _viewModel.CurrentRadius);
+    }
+}
+
+protected override void OnDisappearing()
+{
+    base.OnDisappearing();
+    
+    // Unsubscribe (null 체크)
+    if (_viewModel != null)
+    {
+        _viewModel.PropertyChanged -= OnViewModelPropertyChanged;
+    }
+    MapWebView.Navigated -= OnWebViewNavigated;
+}
+```
+
+---
+
+### 9.4 디버깅: 파일 로깅 필수 ⚠️
+
+#### 왜 필요한가?
+- `dotnet run`에서는 `Debug.WriteLine()` 출력이 보이지 않음
+- 앱이 즉시 종료되면 콘솔 출력도 사라짐
+- 파일 로그만이 앱 종료 후에도 확인 가능
+
+#### 구현 (MauiProgram.cs)
+```csharp
+public static class MauiProgram
+{
+    private static readonly string LogPath = Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.Desktop), 
+        "maui_debug.log");
+
+    public static void Log(string message)
+    {
+        var line = $"[{DateTime.Now:HH:mm:ss.fff}] {message}";
+        try
+        {
+            File.AppendAllText(LogPath, line + Environment.NewLine);
+        }
+        catch { }
+        System.Diagnostics.Debug.WriteLine(line);
+    }
+
+    public static MauiApp CreateMauiApp()
+    {
+        Log("=== MauiProgram.CreateMauiApp START ===");
+        
+        try
+        {
+            var builder = MauiApp.CreateBuilder();
+            Log("[1] MauiAppBuilder created");
+            
+            builder.UseMauiApp<App>();
+            Log("[2] UseMauiApp<App> configured");
+            
+            // Services 등록
+            builder.Services.AddSingleton<IMockDataService, MockDataService>();
+            Log("[3] Services registered");
+            
+            var app = builder.Build();
+            Log("=== MauiProgram.CreateMauiApp SUCCESS ===");
+            return app;
+        }
+        catch (Exception ex)
+        {
+            Log($"!!! MauiProgram.CreateMauiApp FAILED: {ex.Message}");
+            Log(ex.StackTrace ?? "");
+            throw;
+        }
+    }
+}
+```
+
+#### 사용 (MainPage.xaml.cs)
+```csharp
+public MainPage()
+{
+    MauiProgram.Log("=== MainPage Constructor START ===");
+    try
+    {
+        MauiProgram.Log("[1] Calling InitializeComponent...");
+        InitializeComponent();
+        MauiProgram.Log("[2] InitializeComponent done");
+        
+        MauiProgram.Log("[3] Getting services...");
+        var services = IPlatformApplication.Current?.Services;
+        if (services == null)
+        {
+            MauiProgram.Log("!!! Services not available - returning early");
+            return;
+        }
+        MauiProgram.Log("[4] Services obtained");
+        
+        // ... 각 단계마다 로깅
+        
+        MauiProgram.Log("=== MainPage Constructor SUCCESS ===");
+    }
+    catch (Exception ex)
+    {
+        MauiProgram.Log($"!!! MainPage Constructor FAILED: {ex.Message}");
+        MauiProgram.Log(ex.StackTrace ?? "");
+        throw;
+    }
+}
+```
+
+#### 로그 확인
+```powershell
+# Desktop에 생성된 로그 파일 확인
+Get-Content "$env:USERPROFILE\Desktop\maui_debug.log"
+```
+
+---
+
+### 9.5 CommunityToolkit.Mvvm 타입 검증 이해 ⚠️
+
+#### RelayCommand<T> 동작 원리
+```csharp
+// 개발자 작성 코드
+[RelayCommand]
+private void ChangeRadius(double radius) { }
+
+// Source Generator가 자동 생성하는 코드
+public RelayCommand<double> ChangeRadiusCommand { get; private set; }
+
+public ChangeRadiusCommand()
+{
+    ChangeRadiusCommand = new RelayCommand<double>(
+        execute: (radius) => ChangeRadius(radius),
+        canExecute: (radius) => 
+        {
+            // ⚠️ 여기서 타입 검증 발생
+            if (radius is not double)
+                throw new ArgumentException(
+                    $"Parameter cannot be of type {radius.GetType()}, " +
+                    $"as the command type requires an argument of type System.Double.");
+            return true;
+        }
+    );
+}
+```
+
+#### 바인딩 시점 검증
+```
+1. BindingContext = viewModel 설정
+   ↓
+2. XAML 바인딩 평가 시작
+   ↓
+3. Command="{Binding ChangeRadiusCommand}" 바인딩
+   ↓
+4. CommandParameter="1.0" 평가 → System.String
+   ↓
+5. RelayCommand<double>.CanExecute(object parameter) 호출
+   ↓
+6. 타입 검증: parameter is string ≠ double
+   ↓
+7. ThrowArgumentExceptionForInvalidCommandArgument()
+   ↓
+8. 앱 크래시 💥
+```
+
+---
+
+### 9.6 코드 리뷰 체크리스트
+
+#### XAML 검토
+- [ ] CommandParameter에 타입 명시 (`<x:Double>`, `<x:Int32>`, `<x:Boolean>`)
+- [ ] Binding 경로 오타 확인 (`{Binding PropertyName}`)
+- [ ] StaticResource 키 존재 여부 확인
+
+#### C# 검토 (Page)
+- [ ] Page 생성자가 **기본 생성자(매개변수 없음)**인가?
+- [ ] DI 서비스 접근에 `IPlatformApplication.Current.Services` 사용하는가?
+- [ ] Nullable 필드(`?`)에 **모든 메서드에서 null 체크**가 있는가?
+- [ ] Try-catch로 스택 트레이스 캡처하는가?
+
+#### C# 검토 (ViewModel)
+- [ ] RelayCommand<T>의 `T`와 XAML CommandParameter 타입이 일치하는가?
+- [ ] ObservableProperty 필드는 private이고 이름이 camelCase인가?
+- [ ] Command 메서드는 async Task 또는 void인가?
+
+#### MauiProgram.cs 검토
+- [ ] 모든 Services가 등록되어 있는가?
+- [ ] ViewModels가 Transient로 등록되어 있는가?
+- [ ] Pages가 Transient로 등록되어 있는가?
+
+---
+
+### 9.7 빠른 참조 (Quick Reference)
+
+#### XAML 타입 지정
+| C# 타입 | XAML 표현 | 예시 |
+|---------|-----------|------|
+| `double` | `<x:Double>` | `<x:Double>3.14</x:Double>` |
+| `int` | `<x:Int32>` | `<x:Int32>42</x:Int32>` |
+| `bool` | `<x:Boolean>` | `<x:Boolean>True</x:Boolean>` |
+| `string` | 따옴표 | `"Hello"` |
+
+#### DI 패턴
+| 상황 | 방법 | 코드 |
+|------|------|------|
+| Page에서 서비스 가져오기 | `IPlatformApplication.Current.Services` | `services.GetRequiredService<T>()` |
+| 서비스 등록 | `MauiProgram.cs` | `builder.Services.AddSingleton<I, Impl>()` |
+| ViewModel 등록 | `MauiProgram.cs` | `builder.Services.AddTransient<VM>()` |
+
+#### 디버깅
+| 문제 | 해결 방법 |
+|------|-----------|
+| 앱 즉시 종료 | Desktop에 파일 로그 추가 (`File.AppendAllText`) |
+| 에러 위치 파악 | 생명주기 각 단계마다 로깅 |
+| 타입 에러 | XAML CommandParameter 타입 확인 |
+
+---
+
+**작성일**: 2025-12-09 (업데이트: 2025-12-10)  
+**버전**: 1.1  
 **대상**: 1인 개발자 (Cursor AI 활용)  
 **예상 기간**: 4-6주

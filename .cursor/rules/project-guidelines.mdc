@@ -14,7 +14,7 @@ alwaysApply: true
 - Phase 4(Week 6) 종료 시 데모 가능 수준 UX + 배포 패키지 완성.
 
 ## 기술 스택
-- .NET MAUI 9.0 (.NET 9 LTS), C# 13.
+- .NET MAUI 10.0 (.NET 10), C# 13.
 - 아키텍처: MVVM (CommunityToolkit.Mvvm).
 - UI: MAUI Native Controls + Custom XAML Components.
 - 지도: Naver Maps (WebView + JS Interop).
@@ -152,6 +152,51 @@ alwaysApply: true
 9. **PRD.md** - 제품 요구사항
 10. **개발_로드맵.md** - Phase별 상세 계획
 
+## ⭐ 핵심 패턴 & 주의사항 (2025-12-10 업데이트)
+
+### XAML CommandParameter 타입 안전성 (필수!)
+```xml
+<!-- ❌ 잘못됨: String으로 전달됨 -->
+<Button CommandParameter="1.0" />
+
+<!-- ✅ 올바름: Double 타입 명시 -->
+<Button.CommandParameter>
+    <x:Double>1.0</x:Double>
+</Button.CommandParameter>
+```
+- **이유**: CommunityToolkit.Mvvm의 `RelayCommand<T>`는 타입 검증 수행
+- **에러 시점**: BindingContext 설정 시 즉시 crash
+- **상세**: `트러블슈팅_MainPage_DI_CommandParameter.md` 참조
+
+### MAUI DI 패턴 (필수!)
+```csharp
+// ❌ 생성자 주입 불가 (Shell DataTemplate은 기본 생성자만 호출)
+public MainPage(MapViewModel viewModel) { }
+
+// ✅ IPlatformApplication.Current.Services 사용
+public MainPage()
+{
+    InitializeComponent();
+    var services = IPlatformApplication.Current?.Services;
+    if (services == null) return;
+    _viewModel = services.GetRequiredService<MapViewModel>();
+}
+```
+- **Null-safe**: 모든 DI 필드는 nullable(`?`) 선언 + null 체크 필수
+- **서비스 등록**: MauiProgram.cs에서 AddTransient/AddSingleton
+
+### 디버깅: 파일 로깅 (필수!)
+```csharp
+// Desktop/maui_debug.log에 저장
+public static void Log(string message)
+{
+    var line = $"[{DateTime.Now:HH:mm:ss.fff}] {message}";
+    File.AppendAllText(LogPath, line + Environment.NewLine);
+}
+```
+- **이유**: `dotnet run`에서는 Debug.WriteLine() 출력 안 보임
+- **사용**: 생명주기 각 단계마다 로깅 (MauiProgram → App → MainPage)
+
 ## 산출물 요약
 - `PLAN.md` (루트): 4개 Phase 일별 마일스톤, 체크리스트, 수락 기준 (Blazor 버전, 참고용).
 - `진척_관리.md` (루트): MAUI 프로젝트 일일 작업 로그, 체크리스트, 주간 회고.
@@ -160,4 +205,5 @@ alwaysApply: true
 - `MAUI_통합_로드맵.md` (루트): Week 1-4 통합 로드맵, Cursor AI 프롬프트 모음. ⭐
 - `Supabase_스키마.md` (루트): ERD, 테이블 정의, RLS 정책, PostGIS 쿼리. ⭐
 - `디자인-코드_매핑.md` (루트): 디자인 시스템 → XAML 1:1 매핑, 색상/버튼/카드 코드. ⭐
+- `트러블슈팅_MainPage_DI_CommandParameter.md` (루트): MainPage 즉시 종료 문제 해결 기록. ⭐ **NEW!**
 - 본 가이드라인 파일: MVP 빌드 운영 규칙.
