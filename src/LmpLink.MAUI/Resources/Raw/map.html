@@ -188,6 +188,8 @@
                 const marker = markers[markerId];
                 if (marker) {
                     marker.setMap(visible ? map : null);
+                    const action = visible ? '표시' : '숨김';
+                    console.log(`Marker ${markerId} (${marker._personType}): ${action}`);
                     return true;
                 }
                 return false;
