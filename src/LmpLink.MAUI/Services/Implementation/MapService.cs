@@ -47,7 +47,8 @@ public class MapService : IMapService
         {
             var type = person.Type == PersonType.User ? "user" : "assistant";
             var name = EscapeJavaScript(person.Name);
-            var script = $"window.addMarker({person.Id}, '{type}', {person.Latitude}, {person.Longitude}, '{name}');";
+            var address = EscapeJavaScript(person.Address ?? "");
+            var script = $"window.addMarker({person.Id}, '{type}', {person.Latitude}, {person.Longitude}, '{name}', '{address}');";
             await EvaluateJavaScriptAsync(script);
         }
         catch (Exception ex)

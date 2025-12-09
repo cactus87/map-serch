@@ -11,7 +11,7 @@
     <Grid ColumnDefinitions="3*,7*">
         
         <!-- Left Panel (30%): User List & Controls -->
-        <Grid Grid.Column="0" RowDefinitions="Auto,Auto,Auto,*" Padding="10" BackgroundColor="{StaticResource SurfaceDarkGray}">
+        <Grid Grid.Column="0" RowDefinitions="Auto,Auto,Auto,Auto,*" Padding="10" BackgroundColor="{StaticResource SurfaceDarkGray}">
             
             <!-- Title -->
             <Label 
@@ -86,10 +86,11 @@
                 ItemsSource="{Binding Users}"
                 SelectionMode="Single"
                 SelectedItem="{Binding SelectedUser}"
-                BackgroundColor="{StaticResource BackgroundDeepNavy}">
+                BackgroundColor="{StaticResource BackgroundDeepNavy}"
+                HeightRequest="200">
                 <CollectionView.Header>
                     <Label 
-                        Text="이용자 목록"
+                        Text="이용자 목록 (10명)"
                         Style="{StaticResource SmallText}"
                         FontAttributes="Bold"
                         Padding="10,10,10,5" />
@@ -132,6 +133,75 @@
                         </Frame>
                     </DataTemplate>
                 </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            <!-- Assistants CollectionView -->
+            <CollectionView
+                Grid.Row="4"
+                ItemsSource="{Binding FilteredAssistants}"
+                BackgroundColor="{StaticResource BackgroundDeepNavy}">
+                <CollectionView.Header>
+                    <Label 
+                        Text="{Binding FilteredAssistants.Count, StringFormat='활동지원사 목록 ({0}명)'}"
+                        Style="{StaticResource SmallText}"
+                        FontAttributes="Bold"
+                        Padding="10,10,10,5" />
+                </CollectionView.Header>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="models:Person">
+                        <Frame 
+                            Padding="12"
+                            Margin="5,4"
+                            CornerRadius="8"
+                            BorderColor="{StaticResource TextTertiary}"
+                            BackgroundColor="{StaticResource SurfaceDarkGray}"
+                            HasShadow="True">
+                            <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="Auto,*,Auto">
+                                <!-- Orange Square Icon (Assistant Marker) -->
+                                <BoxView 
+                                    Grid.Row="0" Grid.Column="0"
+                                    WidthRequest="16"
+                                    HeightRequest="16"
+                                    Color="{StaticResource AssistantMarker}"
+                                    VerticalOptions="Center"
+                                    Margin="0,0,10,0" />
+                                
+                                <VerticalStackLayout Grid.Row="0" Grid.Column="1" Grid.RowSpan="2" Spacing="4">
+                                    <Label 
+                                        Text="{Binding Name}"
+                                        Style="{StaticResource Heading2}"
+                                        FontSize="16" />
+                                    <Label 
+                                        Text="{Binding Address}"
+                                        Style="{StaticResource SmallText}"
+                                        FontSize="12" />
+                                    <Label 
+                                        Text="{Binding Phone}"
+                                        Style="{StaticResource CaptionText}"
+                                        IsVisible="{Binding Phone, Converter={StaticResource IsNotNullConverter}}" />
+                                </VerticalStackLayout>
+
+                                <!-- Distance (if filtered) -->
+                                <Label 
+                                    Grid.Row="0" Grid.Column="2"
+                                    Text="{Binding DistanceKm, StringFormat='{0:F1}km'}"
+                                    Style="{StaticResource CaptionText}"
+                                    FontAttributes="Bold"
+                                    TextColor="{StaticResource PrimaryCTA}"
+                                    VerticalOptions="Center"
+                                    IsVisible="{Binding DistanceKm, Converter={StaticResource IsNotNullConverter}}" />
+                            </Grid>
+                        </Frame>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+                <CollectionView.EmptyView>
+                    <Label 
+                        Text="이용자를 선택하고 반경을 설정하세요"
+                        Style="{StaticResource SmallText}"
+                        HorizontalOptions="Center"
+                        VerticalOptions="Center"
+                        Padding="20" />
+                </CollectionView.EmptyView>
             </CollectionView>
 
         </Grid>
