@@ -141,33 +141,183 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Naver Map</title>
+    <!-- Naver Maps API v3 (2025) - ncpKeyId parameter -->
+    <script src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=YOUR_NAVER_CLIENT_ID_HERE"></script>
     <style>
-        body { 
-            margin: 0; 
-            padding: 0; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            height: 100vh; 
-            background: #f5f5f5;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
         }
-        .placeholder {
-            text-align: center;
-            color: #666;
-        }
-        .placeholder h2 {
-            margin: 0 0 10px 0;
-            color: #0066CC;
+        #map {
+            width: 100%;
+            height: 100%;
         }
     </style>
 </head>
 <body>
-    <div class="placeholder">
-        <h2>🗺️ 네이버 지도</h2>
-        <p>지도가 여기에 표시됩니다</p>
-        <p style="font-size: 12px; color: #999;">Day 11-12에 연동 예정</p>
-    </div>
+    <div id="map"></div>
+
+    <script>
+        let map = null;
+        let markers = {};
+        let circle = null;
+
+        // Initialize map
+        window.initMap = function(lat, lng, zoom) {
+            try {
+                const center = new naver.maps.LatLng(lat, lng);
+                map = new naver.maps.Map('map', {
+                    center: center,
+                    zoom: zoom,
+                    zoomControl: true,
+                    zoomControlOptions: {
+                        position: naver.maps.Position.TOP_RIGHT
+                    }
+                });
+                console.log('Map initialized:', lat, lng, zoom);
+                return true;
+            } catch (error) {
+                console.error('initMap error:', error);
+                return false;
+            }
+        };
+
+        // Add marker
+        window.addMarker = function(id, type, lat, lng, name) {
+            if (!map) {
+                console.error('Map not initialized');
+                return false;
+            }
+
+            try {
+                const position = new naver.maps.LatLng(lat, lng);
+                
+                // Marker icon style (validated from Blazor project)
+                let iconContent;
+                if (type === 'user') {
+                    // Blue circle (20px) for users
+                    iconContent = '<div style="width:20px;height:20px;background-color:#3B82F6;border:2px solid white;border-radius:50%;box-shadow:0 2px 4px rgba(0,0,0,0.3);cursor:pointer;"></div>';
+                } else {
+                    // Orange square (16px) for assistants
+                    iconContent = '<div style="width:16px;height:16px;background-color:#F97316;border:2px solid white;box-shadow:0 2px 4px rgba(0,0,0,0.3);"></div>';
+                }
+
+                const marker = new naver.maps.Marker({
+                    position: position,
+                    map: map,
+                    title: name,
+                    icon: {
+                        content: iconContent,
+                        anchor: new naver.maps.Point(type === 'user' ? 10 : 8, type === 'user' ? 10 : 8)
+                    }
+                });
+
+                markers[id] = marker;
+                console.log('Marker added:', id, type, name);
+                return true;
+            } catch (error) {
+                console.error('addMarker error:', error);
+                return false;
+            }
+        };
+
+        // Draw circle
+        window.drawCircle = function(lat, lng, radiusKm) {
+            if (!map) {
+                console.error('Map not initialized');
+                return false;
+            }
+
+            try {
+                // Clear existing circle
+                if (circle) {
+                    circle.setMap(null);
+                }
+
+                const center = new naver.maps.LatLng(lat, lng);
+                circle = new naver.maps.Circle({
+                    map: map,
+                    center: center,
+                    radius: radiusKm * 1000, // km to meters
+                    fillColor: '#4285F4',
+                    fillOpacity: 0.2,
+                    strokeColor: '#4285F4',
+                    strokeOpacity: 0.6,
+                    strokeWeight: 2
+                });
+
+                console.log('Circle drawn:', lat, lng, radiusKm);
+                return true;
+            } catch (error) {
+                console.error('drawCircle error:', error);
+                return false;
+            }
+        };
+
+        // Clear circle
+        window.clearCircle = function() {
+            if (circle) {
+                circle.setMap(null);
+                circle = null;
+                console.log('Circle cleared');
+            }
+            return true;
+        };
+
+        // Set marker visibility
+        window.setMarkerVisible = function(id, visible) {
+            if (markers[id]) {
+                markers[id].setMap(visible ? map : null);
+                return true;
+            }
+            return false;
+        };
+
+        // Show all markers
+        window.showAllMarkers = function() {
+            Object.keys(markers).forEach(id => {
+                markers[id].setMap(map);
+            });
+            console.log('All markers shown');
+            return true;
+        };
+
+        // Clear all markers
+        window.clearAllMarkers = function() {
+            Object.keys(markers).forEach(id => {
+                markers[id].setMap(null);
+            });
+            markers = {};
+            console.log('All markers cleared');
+            return true;
+        };
+
+        // Get map center
+        window.getMapCenter = function() {
+            if (!map) return null;
+            const center = map.getCenter();
+            return JSON.stringify({ Lat: center.y, Lng: center.x });
+        };
+
+        // Set map center
+        window.setMapCenter = function(lat, lng) {
+            if (!map) return false;
+            map.setCenter(new naver.maps.LatLng(lat, lng));
+            return true;
+        };
+
+        // Auth failure handler
+        window.navermap_authFailure = function(error) {
+            console.error('Naver Maps auth failed:', error);
+            alert('네이버 지도 인증 실패: ' + JSON.stringify(error));
+        };
+
+        console.log('Naver Maps script loaded successfully');
+    </script>
 </body>
 </html>
                             ]]>

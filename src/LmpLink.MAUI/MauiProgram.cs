@@ -22,6 +22,7 @@ public static class MauiProgram
         // Register Services
         builder.Services.AddSingleton<IMockDataService, MockDataService>();
         builder.Services.AddSingleton<ILocationService, LocationService>();
+        builder.Services.AddSingleton<IMapService, MapService>(); // ⭐ Map JS Interop
 
         // Register ViewModels
         builder.Services.AddTransient<MapViewModel>();
