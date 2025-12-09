@@ -2,28 +2,68 @@ namespace LmpLink.MAUI;
 
 public partial class MainPage : ContentPage
 {
-    private readonly MapViewModel _viewModel;
-    private readonly IMapService _mapService;
+    private MapViewModel? _viewModel;
+    private IMapService? _mapService;
     private bool _isMapReady;
 
-    public MainPage(MapViewModel viewModel, IMapService mapService)
+    public MainPage()
     {
-        InitializeComponent();
+        MauiProgram.Log("=== MainPage Constructor START ===");
+        try
+        {
+            MauiProgram.Log("[1] Calling InitializeComponent...");
+            InitializeComponent();
+            MauiProgram.Log("[2] InitializeComponent done");
 
-        _viewModel = viewModel;
-        _mapService = mapService;
-        BindingContext = _viewModel;
+            // Get services from DI container
+            MauiProgram.Log("[3] Getting services...");
+            var services = IPlatformApplication.Current?.Services;
+            if (services == null)
+            {
+                MauiProgram.Log("!!! Services not available - returning early");
+                return;
+            }
+            MauiProgram.Log("[4] Services obtained");
 
-        // Subscribe to ViewModel property changes
-        _viewModel.PropertyChanged += OnViewModelPropertyChanged;
+            MauiProgram.Log("[5] Getting MapViewModel...");
+            _viewModel = services.GetRequiredService<MapViewModel>();
+            MauiProgram.Log("[6] MapViewModel obtained");
+            
+            MauiProgram.Log("[7] Getting IMapService...");
+            _mapService = services.GetRequiredService<IMapService>();
+            MauiProgram.Log("[8] IMapService obtained");
+            
+            BindingContext = _viewModel;
+            MauiProgram.Log("[9] BindingContext set");
 
-        // Subscribe to WebView Navigated event
-        MapWebView.Navigated += OnWebViewNavigated;
+            // Subscribe to ViewModel property changes
+            _viewModel.PropertyChanged += OnViewModelPropertyChanged;
+            MauiProgram.Log("[10] PropertyChanged subscribed");
+
+            // Subscribe to WebView events
+            MauiProgram.Log("[11] Subscribing to WebView events...");
+            MapWebView.Navigated += OnWebViewNavigated;
+            MapWebView.Navigating += OnWebViewNavigating;
+            MauiProgram.Log("=== MainPage Constructor SUCCESS ===");
+        }
+        catch (Exception ex)
+        {
+            MauiProgram.Log($"!!! MainPage Constructor FAILED: {ex.Message}");
+            MauiProgram.Log(ex.StackTrace ?? "");
+            throw;
+        }
+    }
+
+    private void OnWebViewNavigating(object? sender, WebNavigatingEventArgs e)
+    {
+        System.Diagnostics.Debug.WriteLine($"WebView navigating to: {e.Url}");
     }
 
     protected override async void OnAppearing()
     {
         base.OnAppearing();
+
+        if (_viewModel == null) return;
 
         // Auto-load data if empty
         if (_viewModel.Users.Count == 0)
@@ -39,6 +79,8 @@ public partial class MainPage : ContentPage
             System.Diagnostics.Debug.WriteLine($"WebView navigation failed: {e.Result}");
             return;
         }
+
+        if (_mapService == null || _viewModel == null) return;
 
         // Map HTML loaded successfully
         _isMapReady = true;
@@ -67,7 +109,7 @@ public partial class MainPage : ContentPage
 
     private async void OnViewModelPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
-        if (!_isMapReady) return;
+        if (!_isMapReady || _viewModel == null || _mapService == null) return;
 
         try
         {
@@ -94,6 +136,8 @@ public partial class MainPage : ContentPage
 
     private async Task HandleSelectedUserChanged()
     {
+        if (_viewModel == null || _mapService == null) return;
+
         if (_viewModel.SelectedUser == null)
         {
             // Clear circle if no user selected
@@ -113,6 +157,8 @@ public partial class MainPage : ContentPage
 
     private async Task HandleRadiusChanged()
     {
+        if (_viewModel == null || _mapService == null) return;
+
         if (_viewModel.SelectedUser != null)
         {
             // Redraw circle with new radius
@@ -123,6 +169,8 @@ public partial class MainPage : ContentPage
 
     private async Task HandleFilteredAssistantsChanged()
     {
+        if (_viewModel == null || _mapService == null) return;
+
         // Update marker visibility based on filtered results
         var filteredIds = _viewModel.FilteredAssistants.Select(a => a.Id).ToHashSet();
 
@@ -144,7 +192,11 @@ public partial class MainPage : ContentPage
         base.OnDisappearing();
 
         // Unsubscribe
-        _viewModel.PropertyChanged -= OnViewModelPropertyChanged;
+        if (_viewModel != null)
+        {
+            _viewModel.PropertyChanged -= OnViewModelPropertyChanged;
+        }
         MapWebView.Navigated -= OnWebViewNavigated;
+        MapWebView.Navigating -= OnWebViewNavigating;
     }
 }

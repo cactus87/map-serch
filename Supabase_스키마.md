@@ -4,7 +4,7 @@
 **데이터베이스**: PostgreSQL 16 (Supabase)  
 **확장 기능**: PostGIS 3.4+ (지리공간 데이터)  
 **문서 버전**: 1.0  
-**작성일**: 2025-12-10
+**작성일**: 2025-12-10  
 
 ---
 
@@ -287,7 +287,7 @@ ALTER TABLE matches ENABLE ROW LEVEL SECURITY;
 -- 코디네이터: 자신의 기관 매칭 조회
 CREATE POLICY "coordinators_view_agency_matches" ON matches
   FOR SELECT
-  USING (
+USING (
     user_id IN (SELECT id FROM persons WHERE agency_id = get_user_agency())
   );
 
@@ -296,7 +296,7 @@ CREATE POLICY "assistants_view_own_matches" ON matches
   FOR SELECT
   USING (
     assistant_id = auth.uid()
-  );
+);
 
 -- 지원사: 자신의 매칭 상태 변경 (accept/reject)
 CREATE POLICY "assistants_update_own_match_status" ON matches
@@ -333,8 +333,8 @@ CREATE POLICY "users_update_own_notifications" ON notifications
 ```sql
 -- 도봉구청 기준 3km 이내 지원사 검색
 SELECT 
-  id,
-  name,
+    id,
+    name,
   address,
   ST_Distance(
     location,
@@ -344,7 +344,7 @@ FROM persons
 WHERE 
   type = 'assistant'
   AND ST_DWithin(
-    location,
+      location, 
     ST_SetSRID(ST_MakePoint(127.0471, 37.6688), 4326)::geography,
     3000 -- 3km = 3000m
   )
@@ -477,5 +477,5 @@ await channel.Subscribe();
 ---
 
 **문서 버전**: 1.0  
-**마지막 업데이트**: 2025-12-10  
+**마지막 업데이트**: 2025-12-10
 **다음 업데이트**: Phase 2 (Week 3) Supabase 연동 시

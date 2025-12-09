@@ -4,7 +4,7 @@
 **기술 스택**: .NET MAUI 9.0 + C# 13 + CommunityToolkit.Mvvm  
 **기간**: 4주 (28일)  
 **문서 버전**: 1.0  
-**작성일**: 2025-12-10
+**작성일**: 2025-12-10  
 
 ---
 
@@ -181,7 +181,7 @@ src/LmpLink.MAUI/
    - 발급: https://www.ncloud.com/product/applicationService/maps
    - MainPage.xaml Line 145: `ncpKeyId=YOUR_NAVER_CLIENT_ID_HERE` 교체
 3. **빌드 & 실행**:
-   ```bash
+```bash
    dotnet build && dotnet run
    ```
 

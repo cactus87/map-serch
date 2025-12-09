@@ -33,20 +33,29 @@
                         Grid.Row="0" Grid.Column="0"
                         Text="1km"
                         Style="{StaticResource SecondaryButton}"
-                        Command="{Binding ChangeRadiusCommand}"
-                        CommandParameter="1.0" />
+                        Command="{Binding ChangeRadiusCommand}">
+                        <Button.CommandParameter>
+                            <x:Double>1.0</x:Double>
+                        </Button.CommandParameter>
+                    </Button>
                     <Button 
                         Grid.Row="0" Grid.Column="1"
                         Text="3km"
                         Style="{StaticResource SecondaryButton}"
-                        Command="{Binding ChangeRadiusCommand}"
-                        CommandParameter="3.0" />
+                        Command="{Binding ChangeRadiusCommand}">
+                        <Button.CommandParameter>
+                            <x:Double>3.0</x:Double>
+                        </Button.CommandParameter>
+                    </Button>
                     <Button 
                         Grid.Row="1" Grid.Column="0"
                         Text="5km"
                         Style="{StaticResource SecondaryButton}"
-                        Command="{Binding ChangeRadiusCommand}"
-                        CommandParameter="5.0" />
+                        Command="{Binding ChangeRadiusCommand}">
+                        <Button.CommandParameter>
+                            <x:Double>5.0</x:Double>
+                        </Button.CommandParameter>
+                    </Button>
                     <Button 
                         Grid.Row="1" Grid.Column="1"
                         Text="전체"
