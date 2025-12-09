@@ -243,30 +243,35 @@
                 HorizontalOptions="End"
                 VerticalOptions="End"
                 Margin="20"
-                Padding="15"
-                BackgroundColor="#CC000000"
+                Padding="12"
+                BackgroundColor="#40000000"
                 CornerRadius="8"
                 BorderColor="Transparent"
-                HasShadow="True">
-                <VerticalStackLayout Spacing="8">
+                HasShadow="False">
+                <VerticalStackLayout Spacing="6">
                     <Label 
-                        Text="{Binding CurrentCenterMode, StringFormat='모드: {0}'}" 
                         Style="{StaticResource SmallText}" 
                         FontAttributes="Bold"
-                        TextColor="White" />
+                        TextColor="White">
+                        <Label.Text>
+                            <MultiBinding StringFormat="모드: {0}">
+                                <Binding Path="CurrentCenterMode" Converter="{StaticResource CenterModeToKoreanConverter}" />
+                            </MultiBinding>
+                        </Label.Text>
+                    </Label>
                     <Label 
                         Text="{Binding CurrentRadius, StringFormat='반경: {0}km'}" 
                         Style="{StaticResource SmallText}" 
-                        TextColor="#CCCCCC" />
-                    <BoxView HeightRequest="1" Color="#444444" Margin="0,5" />
+                        TextColor="#DDDDDD" />
+                    <BoxView HeightRequest="1" Color="#555555" Margin="0,3" />
                     <Label 
                         Text="{Binding UsersInRadius, StringFormat='이용자: {0}명'}" 
                         Style="{StaticResource SmallText}" 
-                        TextColor="#3B82F6" />
+                        TextColor="#60A5FA" />
                     <Label 
                         Text="{Binding AssistantsInRadius, StringFormat='지원사: {0}명'}" 
                         Style="{StaticResource SmallText}" 
-                        TextColor="#F97316" />
+                        TextColor="#FB923C" />
                 </VerticalStackLayout>
             </Frame>
 

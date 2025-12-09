@@ -91,6 +91,11 @@ public partial class MapViewModel : BaseViewModel
             Users = new ObservableCollection<Person>(users);
             Assistants = new ObservableCollection<Person>(assistants);
             FilteredAssistants = new ObservableCollection<Person>(assistants);
+            FilteredUsers = new ObservableCollection<Person>(users);
+
+            // Initialize counts
+            UsersInRadius = users.Count;
+            AssistantsInRadius = assistants.Count;
 
             UpdateFilterStatusText();
         });

@@ -27,6 +27,7 @@
         let map = null;
         let markers = {};
         let currentCircle = null;
+        let highlightedMarker = null; // Currently highlighted marker
         
         // Auth failure handler
         window.navermap_authFailure = function() {
@@ -82,11 +83,17 @@
                     title: name,
                     icon: {
                         content: isUser 
-                            ? '<div style="width:16px;height:16px;border-radius:50%;background:#3B82F6;border:2px solid white;"></div>'
-                            : '<div style="width:16px;height:16px;background:#F97316;border:2px solid white;"></div>',
+                            ? '<div class="marker-default" style="width:16px;height:16px;border-radius:50%;background:#3B82F6;border:2px solid white;transition:all 0.3s;"></div>'
+                            : '<div class="marker-default" style="width:16px;height:16px;background:#F97316;border:2px solid white;transition:all 0.3s;"></div>',
                         anchor: new naver.maps.Point(8, 8)
                     }
                 });
+                
+                // Store marker metadata
+                marker._personId = id;
+                marker._personType = type;
+                marker._personName = name;
+                marker._personAddress = address;
                 
                 // Info window on click
                 const infoWindow = new naver.maps.InfoWindow({
@@ -218,7 +225,7 @@
             }
         }
         
-        // Focus on marker with highlight
+        // Focus on marker with highlight (크기 확대, 색상 변경, 진동 애니메이션)
         function focusMarker(markerId) {
             try {
                 const marker = markers[markerId];
@@ -227,6 +234,31 @@
                     return false;
                 }
                 
+                // Reset previous highlighted marker
+                if (highlightedMarker && highlightedMarker !== marker) {
+                    const prevType = highlightedMarker._personType;
+                    const prevIsUser = prevType === 'user';
+                    highlightedMarker.setIcon({
+                        content: prevIsUser 
+                            ? '<div style="width:16px;height:16px;border-radius:50%;background:#3B82F6;border:2px solid white;transition:all 0.3s;"></div>'
+                            : '<div style="width:16px;height:16px;background:#F97316;border:2px solid white;transition:all 0.3s;"></div>',
+                        anchor: new naver.maps.Point(8, 8)
+                    });
+                }
+                
+                // Highlight current marker (크기 2배, 색상 밝게, 진동 애니메이션)
+                const isUser = marker._personType === 'user';
+                marker.setIcon({
+                    content: isUser 
+                        ? `<div style="width:32px;height:32px;border-radius:50%;background:#60A5FA;border:3px solid white;box-shadow:0 0 20px rgba(59,130,246,0.8);animation:bounce 0.6s ease-in-out;"></div>
+                           <style>@keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }</style>`
+                        : `<div style="width:32px;height:32px;background:#FB923C;border:3px solid white;box-shadow:0 0 20px rgba(249,115,22,0.8);animation:bounce 0.6s ease-in-out;"></div>
+                           <style>@keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }</style>`,
+                    anchor: new naver.maps.Point(16, 16)
+                });
+                
+                highlightedMarker = marker;
+                
                 // Move map center to marker
                 map.setCenter(marker.getPosition());
                 map.setZoom(15); // Zoom in
@@ -234,7 +266,7 @@
                 // Trigger click event to open InfoWindow
                 naver.maps.Event.trigger(marker, 'click');
                 
-                console.log(`✨ Focused on marker ${markerId}`);
+                console.log(`✨ Focused on marker ${markerId} with highlight`);
                 return true;
             } catch (error) {
                 console.error('Focus marker failed:', error);
