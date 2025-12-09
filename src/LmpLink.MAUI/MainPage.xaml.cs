@@ -56,54 +56,80 @@ public partial class MainPage : ContentPage
 
     private void OnWebViewNavigating(object? sender, WebNavigatingEventArgs e)
     {
-        System.Diagnostics.Debug.WriteLine($"WebView navigating to: {e.Url}");
+        MauiProgram.Log($"[WebView] Navigating to: {e.Url}");
     }
 
     protected override async void OnAppearing()
     {
         base.OnAppearing();
+        MauiProgram.Log("=== MainPage.OnAppearing START ===");
 
-        if (_viewModel == null) return;
+        if (_viewModel == null)
+        {
+            MauiProgram.Log("!!! ViewModel is null in OnAppearing");
+            return;
+        }
 
         // Auto-load data if empty
         if (_viewModel.Users.Count == 0)
         {
+            MauiProgram.Log($"[OnAppearing] Loading data... (current count: {_viewModel.Users.Count})");
             await _viewModel.LoadDataCommand.ExecuteAsync(null);
+            MauiProgram.Log($"[OnAppearing] Data loaded: {_viewModel.Users.Count} users, {_viewModel.Assistants.Count} assistants");
         }
+        else
+        {
+            MauiProgram.Log($"[OnAppearing] Data already loaded: {_viewModel.Users.Count} users");
+        }
+        
+        MauiProgram.Log("=== MainPage.OnAppearing DONE ===");
     }
 
     private async void OnWebViewNavigated(object? sender, WebNavigatedEventArgs e)
     {
+        MauiProgram.Log($"=== OnWebViewNavigated START === Result: {e.Result}");
+        
         if (e.Result != WebNavigationResult.Success)
         {
-            System.Diagnostics.Debug.WriteLine($"WebView navigation failed: {e.Result}");
+            MauiProgram.Log($"!!! WebView navigation FAILED: {e.Result}");
             return;
         }
 
-        if (_mapService == null || _viewModel == null) return;
+        if (_mapService == null || _viewModel == null)
+        {
+            MauiProgram.Log($"!!! Services null: MapService={_mapService == null}, ViewModel={_viewModel == null}");
+            return;
+        }
 
         // Map HTML loaded successfully
         _isMapReady = true;
-        System.Diagnostics.Debug.WriteLine("WebView navigation success. Initializing map...");
+        MauiProgram.Log("[WebView] Navigation SUCCESS. Initializing map...");
 
         try
         {
             // Set WebView reference
             _mapService.SetWebView(MapWebView);
+            MauiProgram.Log("[WebView] MapService.SetWebView() called");
 
             // Initialize map
-            await Task.Delay(500); // Wait for DOM ready
+            MauiProgram.Log("[WebView] Waiting 500ms for DOM ready...");
+            await Task.Delay(500);
+            
+            MauiProgram.Log("[WebView] Calling MapService.InitMapAsync()...");
             await _mapService.InitMapAsync();
+            MauiProgram.Log("[WebView] Map initialized!");
 
             // Add all markers
-            var allPersons = _viewModel.Users.Concat(_viewModel.Assistants);
+            var allPersons = _viewModel.Users.Concat(_viewModel.Assistants).ToList();
+            MauiProgram.Log($"[WebView] Adding {allPersons.Count} markers...");
             await _mapService.AddMarkersAsync(allPersons);
 
-            System.Diagnostics.Debug.WriteLine("Map initialized successfully.");
+            MauiProgram.Log("=== Map initialization SUCCESS ===");
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"Map initialization failed: {ex.Message}");
+            MauiProgram.Log($"!!! Map initialization FAILED: {ex.Message}");
+            MauiProgram.Log(ex.StackTrace ?? "");
         }
     }
 

@@ -95,4 +95,5 @@ C:\ai\projects\map-demo\MapDemo\obj\Debug\net9.0\refint\MapDemo.dll
 C:\ai\projects\map-demo\MapDemo\obj\Debug\net9.0\MapDemo.pdb
 C:\ai\projects\map-demo\MapDemo\obj\Debug\net9.0\MapDemo.genruntimeconfig.cache
 C:\ai\projects\map-demo\MapDemo\obj\Debug\net9.0\ref\MapDemo.dll
-C:\ai\projects\map-demo\MapDemo\obj\Debug\net9.0\compressed\ed2qwbdo86-{0}-k03stzw5o3-k03stzw5o3.gz
+C:\ai\projects\map-demo\MapDemo\obj\Debug\net9.0\MapDemo.sourcelink.json
+C:\ai\projects\map-demo\MapDemo\obj\Debug\net9.0\compressed\ed2qwbdo86-{0}-vf405wazl0-vf405wazl0.gz

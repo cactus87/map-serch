@@ -1,0 +1,2 @@
+C:\ai\projects\map-demo\MapDemo\obj\Debug\net10.0-windows10.0.19041.0\EmbeddedAttribute.cs
+C:\ai\projects\map-demo\MapDemo\obj\Debug\net10.0-windows10.0.19041.0\ValidatableTypeAttribute.cs

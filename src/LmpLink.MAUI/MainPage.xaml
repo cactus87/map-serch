@@ -140,38 +140,8 @@
         <Grid Grid.Column="1" BackgroundColor="{StaticResource BackgroundDeepNavy}">
             <WebView 
                 x:Name="MapWebView"
-                BackgroundColor="{StaticResource SurfaceDarkGray}">
-                <WebView.Source>
-                    <HtmlWebViewSource>
-                        <HtmlWebViewSource.Html>
-                            <![CDATA[
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>Simple Test</title>
-    <style>
-        body {
-            margin: 0;
-            padding: 20px;
-            background-color: #1a1a2e;
-            color: white;
-            font-family: Arial, sans-serif;
-        }
-        h1 { color: #3B82F6; }
-    </style>
-</head>
-<body>
-    <h1>WebView Test - Success!</h1>
-    <p>If you see this, WebView2 is working correctly.</p>
-    <button onclick="alert('JavaScript works!')">Test JavaScript</button>
-</body>
-</html>
-                            ]]>
-                        </HtmlWebViewSource.Html>
-                    </HtmlWebViewSource>
-                </WebView.Source>
-            </WebView>
+                BackgroundColor="{StaticResource SurfaceDarkGray}"
+                Source="map.html" />
 
             <!-- Loading Overlay -->
             <ActivityIndicator
@@ -187,4 +157,3 @@
     </Grid>
 
 </ContentPage>
-
