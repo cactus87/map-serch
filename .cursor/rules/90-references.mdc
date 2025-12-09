@@ -1,7 +1,10 @@
 ---
-description: Document Reference Map - 필요할 때 @mention으로 참조
-globs: []
-alwaysApply: false
+description: Document Reference Map - Quick lookup for troubleshooting and guides
+globs:
+  - "**/*.cs"
+  - "**/*.xaml"
+  - "**/*.md"
+alwaysApply: true
 ---
 
 # 📚 Document Reference Map
@@ -97,3 +100,5 @@ alwaysApply: false
 
 **버전**: 1.0  
 **업데이트**: 2025-12-10
+
+

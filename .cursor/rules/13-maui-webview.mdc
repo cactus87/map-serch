@@ -103,3 +103,5 @@ private async void OnWebViewNavigated(object? sender, WebNavigatedEventArgs e)
 **참고**: 
 - 네이버_API_인증_가이드.md (인증 문제)
 - MAUI_개발_가이드.md Section 6 (WebView + JS Interop)
+
+

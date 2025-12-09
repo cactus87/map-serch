@@ -178,3 +178,5 @@ Ctrl + Shift + P → Reload Window
 **작성자**: AI Assistant  
 **검토**: 사용자  
 **상태**: ✅ 적용 완료
+
+
