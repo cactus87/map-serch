@@ -172,11 +172,14 @@ public partial class MainPage : ContentPage
     {
         if (_viewModel == null || _mapService == null) return;
 
+        MauiProgram.Log($"[HandleSelectedUserChanged] User: {_viewModel.SelectedUser?.Name ?? "null"}, Mode: {_viewModel.CurrentCenterMode}");
+
         if (_viewModel.SelectedUser == null)
         {
             // Clear circle if no user selected
             await _mapService.ClearCircleAsync();
             await _mapService.ShowAllMarkersAsync();
+            await UpdateMarkerCountsFromMap();
         }
         else
         {
@@ -190,6 +193,9 @@ public partial class MainPage : ContentPage
             {
                 await _mapService.DrawCircleAsync(user.Latitude, user.Longitude, _viewModel.CurrentRadius);
             }
+            
+            // Update counts after drawing
+            await UpdateMarkerCountsFromMap();
         }
     }
 
@@ -197,11 +203,14 @@ public partial class MainPage : ContentPage
     {
         if (_viewModel == null || _mapService == null) return;
 
+        MauiProgram.Log($"[HandleSelectedAssistantChanged] Assistant: {_viewModel.SelectedAssistant?.Name ?? "null"}, Mode: {_viewModel.CurrentCenterMode}");
+
         if (_viewModel.SelectedAssistant == null)
         {
             // Clear circle if no assistant selected
             await _mapService.ClearCircleAsync();
             await _mapService.ShowAllMarkersAsync();
+            await UpdateMarkerCountsFromMap();
         }
         else
         {
@@ -215,6 +224,9 @@ public partial class MainPage : ContentPage
             {
                 await _mapService.DrawCircleAsync(assistant.Latitude, assistant.Longitude, _viewModel.CurrentRadius);
             }
+            
+            // Update counts after drawing
+            await UpdateMarkerCountsFromMap();
         }
     }
 
@@ -222,17 +234,21 @@ public partial class MainPage : ContentPage
     {
         if (_viewModel == null || _mapService == null) return;
 
+        MauiProgram.Log($"[HandleRadiusChanged] Radius: {_viewModel.CurrentRadius}km");
+
         if (_viewModel.CurrentCenterMode == CenterMode.User && _viewModel.SelectedUser != null)
         {
             // Redraw circle with new radius (User-centric)
             var user = _viewModel.SelectedUser;
             await _mapService.DrawCircleAsync(user.Latitude, user.Longitude, _viewModel.CurrentRadius);
+            await UpdateMarkerCountsFromMap();
         }
         else if (_viewModel.CurrentCenterMode == CenterMode.Assistant && _viewModel.SelectedAssistant != null)
         {
             // Redraw circle with new radius (Assistant-centric)
             var assistant = _viewModel.SelectedAssistant;
             await _mapService.DrawCircleAsync(assistant.Latitude, assistant.Longitude, _viewModel.CurrentRadius);
+            await UpdateMarkerCountsFromMap();
         }
     }
 
@@ -296,6 +312,9 @@ public partial class MainPage : ContentPage
 
         try
         {
+            // Small delay to ensure marker visibility changes are applied
+            await Task.Delay(100);
+
             // Get actual visible marker count from JavaScript
             var (users, assistants) = await _mapService.GetVisibleMarkerCountAsync();
             
@@ -303,11 +322,12 @@ public partial class MainPage : ContentPage
             _viewModel.UsersInRadius = users;
             _viewModel.AssistantsInRadius = assistants;
 
-            MauiProgram.Log($"Marker count updated: 이용자 {users}명, 지원사 {assistants}명");
+            MauiProgram.Log($"✅ Marker count updated: 이용자 {users}명, 지원사 {assistants}명");
         }
         catch (Exception ex)
         {
-            MauiProgram.Log($"Failed to update marker counts: {ex.Message}");
+            MauiProgram.Log($"❌ Failed to update marker counts: {ex.Message}");
+            MauiProgram.Log(ex.StackTrace ?? "");
         }
     }
 
