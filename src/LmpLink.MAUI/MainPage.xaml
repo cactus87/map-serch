@@ -244,7 +244,7 @@
                 VerticalOptions="End"
                 Margin="20"
                 Padding="12"
-                BackgroundColor="#40000000"
+                BackgroundColor="#B0000000"
                 CornerRadius="8"
                 BorderColor="Transparent"
                 HasShadow="False">
