@@ -70,6 +70,10 @@ public partial class MapPage : ContentPage
             return;
         }
 
+        // Re-subscribe to events (in case they were unsubscribed)
+        _viewModel.PropertyChanged -= OnViewModelPropertyChanged;
+        _viewModel.PropertyChanged += OnViewModelPropertyChanged;
+
         // Auto-load data if empty
         if (_viewModel.Users.Count == 0)
         {
@@ -80,9 +84,86 @@ public partial class MapPage : ContentPage
         else
         {
             MauiProgram.Log($"[OnAppearing] Data already loaded: {_viewModel.Users.Count} users");
+            
+            // Restore map state if returning from another tab
+            if (_isMapReady && _mapService != null)
+            {
+                await RestoreMapStateAsync();
+            }
         }
         
         MauiProgram.Log("=== MapPage.OnAppearing DONE ===");
+    }
+
+    /// <summary>
+    /// Restore map state (selected person, circle) when returning to this page.
+    /// </summary>
+    private async Task RestoreMapStateAsync()
+    {
+        if (_viewModel == null || _mapService == null) return;
+
+        MauiProgram.Log("[RestoreMapState] Restoring map state...");
+
+        try
+        {
+            if (_viewModel.CurrentCenterMode == CenterMode.User && _viewModel.SelectedUser != null)
+            {
+                var user = _viewModel.SelectedUser;
+                MauiProgram.Log($"[RestoreMapState] Restoring User: {user.Name}, Radius: {_viewModel.CurrentRadius}km");
+                
+                // Focus on selected user
+                await _mapService.FocusMarkerAsync(user.Id);
+                
+                // Draw circle
+                if (_viewModel.CurrentRadius > 0)
+                {
+                    await _mapService.DrawCircleAsync(user.Latitude, user.Longitude, _viewModel.CurrentRadius);
+                }
+                
+                // Update marker visibility
+                var filteredIds = _viewModel.FilteredAssistants.Select(a => a.Id).ToHashSet();
+                foreach (var assistant in _viewModel.Assistants)
+                {
+                    await _mapService.SetMarkerVisibleAsync(assistant.Id, filteredIds.Contains(assistant.Id));
+                }
+                foreach (var u in _viewModel.Users)
+                {
+                    await _mapService.SetMarkerVisibleAsync(u.Id, u.Id == user.Id);
+                }
+            }
+            else if (_viewModel.CurrentCenterMode == CenterMode.Assistant && _viewModel.SelectedAssistant != null)
+            {
+                var assistant = _viewModel.SelectedAssistant;
+                MauiProgram.Log($"[RestoreMapState] Restoring Assistant: {assistant.Name}, Radius: {_viewModel.CurrentRadius}km");
+                
+                // Focus on selected assistant
+                await _mapService.FocusMarkerAsync(assistant.Id);
+                
+                // Draw circle
+                if (_viewModel.CurrentRadius > 0)
+                {
+                    await _mapService.DrawCircleAsync(assistant.Latitude, assistant.Longitude, _viewModel.CurrentRadius);
+                }
+                
+                // Update marker visibility
+                var filteredIds = _viewModel.FilteredUsers.Select(u => u.Id).ToHashSet();
+                foreach (var user in _viewModel.Users)
+                {
+                    await _mapService.SetMarkerVisibleAsync(user.Id, filteredIds.Contains(user.Id));
+                }
+                foreach (var a in _viewModel.Assistants)
+                {
+                    await _mapService.SetMarkerVisibleAsync(a.Id, a.Id == assistant.Id);
+                }
+            }
+
+            await UpdateMarkerCountsFromMap();
+            MauiProgram.Log("[RestoreMapState] Map state restored successfully");
+        }
+        catch (Exception ex)
+        {
+            MauiProgram.Log($"[RestoreMapState] FAILED: {ex.Message}");
+        }
     }
 
     private async void OnWebViewNavigated(object? sender, WebNavigatedEventArgs e)
@@ -376,13 +457,9 @@ public partial class MapPage : ContentPage
     protected override void OnDisappearing()
     {
         base.OnDisappearing();
-
-        // Unsubscribe
-        if (_viewModel != null)
-        {
-            _viewModel.PropertyChanged -= OnViewModelPropertyChanged;
-        }
-        MapWebView.Navigated -= OnWebViewNavigated;
-        MapWebView.Navigating -= OnWebViewNavigating;
+        MauiProgram.Log("=== MapPage.OnDisappearing ===");
+        
+        // Don't unsubscribe from events on tab switch to maintain state
+        // Events will be re-subscribed in OnAppearing if needed
     }
 }

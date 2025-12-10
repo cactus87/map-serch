@@ -90,8 +90,14 @@ public partial class ManagementViewModel : BaseViewModel
     /// Apply search and type filter.
     /// </summary>
     [RelayCommand]
-    private void ApplyFilter()
+    private void ApplyFilter(string? typeFilter = null)
     {
+        // Update type filter if provided
+        if (!string.IsNullOrEmpty(typeFilter))
+        {
+            SelectedTypeFilter = typeFilter;
+        }
+
         MauiProgram.Log($"[ManagementViewModel] ApplyFilter: SearchText='{SearchText}', Type='{SelectedTypeFilter}'");
 
         var filtered = AllPersons.AsEnumerable();

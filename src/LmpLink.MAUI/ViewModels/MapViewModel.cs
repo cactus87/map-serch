@@ -377,6 +377,7 @@ public partial class MapViewModel : BaseViewModel
 
     /// <summary>
     /// Show detail panel for a person (from marker click or list click).
+    /// Also selects the person and triggers radius filtering.
     /// </summary>
     [RelayCommand]
     private void ShowPersonDetail(Person? person)
@@ -387,6 +388,29 @@ public partial class MapViewModel : BaseViewModel
         }
 
         MauiProgram.Log($"[MapViewModel] ShowPersonDetail: {person.Name} ({person.Type})");
+        
+        // Select person and trigger filtering based on type and mode
+        if (person.Type == PersonType.User)
+        {
+            SelectedUser = person;
+            
+            // If in User-centric mode, filter assistants by radius
+            if (CurrentCenterMode == CenterMode.User)
+            {
+                FilterAssistantsByRadius();
+            }
+        }
+        else // Assistant
+        {
+            SelectedAssistant = person;
+            
+            // If in Assistant-centric mode, filter users by radius
+            if (CurrentCenterMode == CenterMode.Assistant)
+            {
+                FilterUsersByRadius();
+            }
+        }
+        
         SelectedPerson = person;
         IsDetailPanelVisible = true;
     }

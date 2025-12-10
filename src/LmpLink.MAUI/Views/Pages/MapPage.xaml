@@ -264,9 +264,9 @@
                 BackgroundColor="{StaticResource SurfaceDarkGray}"
                 Source="map.html" />
 
-            <!-- Info Overlay (Right Bottom) -->
+            <!-- Info Overlay (Left Bottom) -->
             <Frame 
-                HorizontalOptions="End"
+                HorizontalOptions="Start"
                 VerticalOptions="End"
                 Margin="20"
                 Padding="12"
@@ -302,16 +302,17 @@
             </Frame>
 
             <!-- Detail Panel (Slide-out from right) -->
-            <Frame 
+            <Border 
                 IsVisible="{Binding IsDetailPanelVisible}"
                 HorizontalOptions="End"
                 VerticalOptions="Fill"
-                WidthRequest="350"
+                WidthRequest="380"
+                Margin="0"
                 Padding="0"
                 BackgroundColor="{StaticResource SurfaceDarkGray}"
-                CornerRadius="12,0,0,12"
-                BorderColor="{StaticResource PrimaryCTA}"
-                HasShadow="True">
+                Stroke="{StaticResource PrimaryCTA}"
+                StrokeThickness="2"
+                StrokeShape="RoundRectangle 12,0,0,12">
                 <Grid RowDefinitions="Auto,*,Auto" Padding="20">
                     
                     <!-- Header -->
@@ -374,18 +375,6 @@
                                     TextColor="{StaticResource TextWhite}" />
                             </VerticalStackLayout>
 
-                            <!-- Email -->
-                            <VerticalStackLayout Spacing="5">
-                                <Label 
-                                    Text="이메일"
-                                    Style="{StaticResource Caption}"
-                                    TextColor="{StaticResource TextLightGray}" />
-                                <Label 
-                                    Text="{Binding SelectedPerson.Email}"
-                                    Style="{StaticResource Body2}"
-                                    TextColor="{StaticResource TextWhite}" />
-                            </VerticalStackLayout>
-
                             <!-- Phone -->
                             <VerticalStackLayout Spacing="5">
                                 <Label 
@@ -398,14 +387,26 @@
                                     TextColor="{StaticResource TextWhite}" />
                             </VerticalStackLayout>
 
+                            <!-- Gender -->
+                            <VerticalStackLayout Spacing="5" IsVisible="{Binding SelectedPerson.Gender, Converter={StaticResource IsNotNullConverter}}">
+                                <Label 
+                                    Text="성별"
+                                    Style="{StaticResource Caption}"
+                                    TextColor="{StaticResource TextLightGray}" />
+                                <Label 
+                                    Text="{Binding SelectedPerson.Gender}"
+                                    Style="{StaticResource Body2}"
+                                    TextColor="{StaticResource TextWhite}" />
+                            </VerticalStackLayout>
+
                             <!-- Experience (for Assistants) -->
-                            <VerticalStackLayout Spacing="5" IsVisible="{Binding SelectedPerson.ExperienceYears, Converter={StaticResource IsNotNullConverter}}">
+                            <VerticalStackLayout Spacing="5" IsVisible="{Binding SelectedPerson.Experience, Converter={StaticResource IsNotNullConverter}}">
                                 <Label 
                                     Text="경력"
                                     Style="{StaticResource Caption}"
                                     TextColor="{StaticResource TextLightGray}" />
                                 <Label 
-                                    Text="{Binding SelectedPerson.ExperienceYears, StringFormat='{0}년'}"
+                                    Text="{Binding SelectedPerson.Experience, StringFormat='{0}년'}"
                                     Style="{StaticResource Body2}"
                                     TextColor="{StaticResource TextWhite}" />
                             </VerticalStackLayout>
@@ -423,13 +424,13 @@
                             </VerticalStackLayout>
 
                             <!-- Distance (if filtered) -->
-                            <VerticalStackLayout Spacing="5" IsVisible="{Binding SelectedPerson.Distance, Converter={StaticResource IsNotNullConverter}}">
+                            <VerticalStackLayout Spacing="5" IsVisible="{Binding SelectedPerson.DistanceKm, Converter={StaticResource IsNotNullConverter}}">
                                 <Label 
                                     Text="거리"
                                     Style="{StaticResource Caption}"
                                     TextColor="{StaticResource TextLightGray}" />
                                 <Label 
-                                    Text="{Binding SelectedPerson.Distance, StringFormat='{0:F2}km'}"
+                                    Text="{Binding SelectedPerson.DistanceKm, StringFormat='{0:F2}km'}"
                                     Style="{StaticResource Body2}"
                                     TextColor="{StaticResource PrimaryCTA}" />
                             </VerticalStackLayout>
@@ -456,7 +457,7 @@
                     </VerticalStackLayout>
 
                 </Grid>
-            </Frame>
+            </Border>
 
             <!-- Loading Overlay -->
             <ActivityIndicator

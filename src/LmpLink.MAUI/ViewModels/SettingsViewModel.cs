@@ -178,6 +178,36 @@ public partial class SettingsViewModel : BaseViewModel
     }
 
     /// <summary>
+    /// Update user marker color.
+    /// </summary>
+    [RelayCommand]
+    private void UpdateUserMarkerColor(string color)
+    {
+        MauiProgram.Log($"[SettingsViewModel] UpdateUserMarkerColor: {color}");
+        UserMarkerColor = color;
+    }
+
+    /// <summary>
+    /// Update assistant marker color.
+    /// </summary>
+    [RelayCommand]
+    private void UpdateAssistantMarkerColor(string color)
+    {
+        MauiProgram.Log($"[SettingsViewModel] UpdateAssistantMarkerColor: {color}");
+        AssistantMarkerColor = color;
+    }
+
+    /// <summary>
+    /// Update circle color.
+    /// </summary>
+    [RelayCommand]
+    private void UpdateCircleColor(string color)
+    {
+        MauiProgram.Log($"[SettingsViewModel] UpdateCircleColor: {color}");
+        CircleColor = color;
+    }
+
+    /// <summary>
     /// Update font size.
     /// </summary>
     [RelayCommand]

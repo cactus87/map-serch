@@ -8,16 +8,19 @@
              BackgroundColor="{StaticResource BackgroundDeepNavy}">
 
     <ScrollView>
-        <VerticalStackLayout Padding="20" Spacing="20">
+        <Grid Padding="20" RowDefinitions="Auto,Auto,Auto,Auto" ColumnDefinitions="*,*" ColumnSpacing="20" RowSpacing="20">
             
-            <!-- Title -->
+            <!-- Title (Full Width) -->
             <Label 
+                Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2"
                 Text="⚙️ 설정"
                 Style="{StaticResource Heading1}"
                 TextColor="{StaticResource PrimaryCTA}" />
 
+            <!-- LEFT COLUMN -->
+            
             <!-- Marker Settings -->
-            <Frame BackgroundColor="{StaticResource SurfaceDarkGray}" Padding="20" CornerRadius="12">
+            <Frame Grid.Row="1" Grid.Column="0" BackgroundColor="{StaticResource SurfaceDarkGray}" Padding="20" CornerRadius="12">
                 <VerticalStackLayout Spacing="15">
                     <Label 
                         Text="🎨 마커 설정"
@@ -25,42 +28,158 @@
                         TextColor="{StaticResource TextWhite}" />
                     
                     <!-- User Marker Color -->
-                    <Grid ColumnDefinitions="*,Auto">
+                    <VerticalStackLayout Spacing="8">
                         <Label 
-                            Grid.Column="0"
                             Text="이용자 마커 색상"
                             Style="{StaticResource Body1}"
-                            TextColor="{StaticResource TextLightGray}"
-                            VerticalOptions="Center" />
-                        <Frame 
-                            Grid.Column="1"
-                            WidthRequest="80"
-                            HeightRequest="40"
-                            CornerRadius="8"
-                            Padding="0"
-                            HasShadow="False"
-                            BorderColor="{StaticResource TextTertiary}"
-                            BackgroundColor="{Binding UserMarkerColor}" />
-                    </Grid>
+                            TextColor="{StaticResource TextLightGray}" />
+                        <HorizontalStackLayout Spacing="10">
+                            <Border WidthRequest="50" HeightRequest="50" StrokeThickness="3" BackgroundColor="#60A5FA">
+                                <Border.StrokeShape><RoundRectangle CornerRadius="8" /></Border.StrokeShape>
+                                <Border.Triggers>
+                                    <DataTrigger TargetType="Border" Binding="{Binding UserMarkerColor}" Value="#60A5FA">
+                                        <Setter Property="Stroke" Value="#FBBF24" />
+                                    </DataTrigger>
+                                </Border.Triggers>
+                                <Border.Stroke><SolidColorBrush Color="Transparent" /></Border.Stroke>
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding UpdateUserMarkerColorCommand}" CommandParameter="#60A5FA" />
+                                </Border.GestureRecognizers>
+                            </Border>
+                            <Border WidthRequest="50" HeightRequest="50" StrokeThickness="3" BackgroundColor="#34D399">
+                                <Border.StrokeShape><RoundRectangle CornerRadius="8" /></Border.StrokeShape>
+                                <Border.Triggers>
+                                    <DataTrigger TargetType="Border" Binding="{Binding UserMarkerColor}" Value="#34D399">
+                                        <Setter Property="Stroke" Value="#FBBF24" />
+                                    </DataTrigger>
+                                </Border.Triggers>
+                                <Border.Stroke><SolidColorBrush Color="Transparent" /></Border.Stroke>
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding UpdateUserMarkerColorCommand}" CommandParameter="#34D399" />
+                                </Border.GestureRecognizers>
+                            </Border>
+                            <Border WidthRequest="50" HeightRequest="50" StrokeThickness="3" BackgroundColor="#F472B6">
+                                <Border.StrokeShape><RoundRectangle CornerRadius="8" /></Border.StrokeShape>
+                                <Border.Triggers>
+                                    <DataTrigger TargetType="Border" Binding="{Binding UserMarkerColor}" Value="#F472B6">
+                                        <Setter Property="Stroke" Value="#FBBF24" />
+                                    </DataTrigger>
+                                </Border.Triggers>
+                                <Border.Stroke><SolidColorBrush Color="Transparent" /></Border.Stroke>
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding UpdateUserMarkerColorCommand}" CommandParameter="#F472B6" />
+                                </Border.GestureRecognizers>
+                            </Border>
+                            <Border WidthRequest="50" HeightRequest="50" StrokeThickness="3" BackgroundColor="#A78BFA">
+                                <Border.StrokeShape><RoundRectangle CornerRadius="8" /></Border.StrokeShape>
+                                <Border.Triggers>
+                                    <DataTrigger TargetType="Border" Binding="{Binding UserMarkerColor}" Value="#A78BFA">
+                                        <Setter Property="Stroke" Value="#FBBF24" />
+                                    </DataTrigger>
+                                </Border.Triggers>
+                                <Border.Stroke><SolidColorBrush Color="Transparent" /></Border.Stroke>
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding UpdateUserMarkerColorCommand}" CommandParameter="#A78BFA" />
+                                </Border.GestureRecognizers>
+                            </Border>
+                            <Border WidthRequest="50" HeightRequest="50" StrokeThickness="3" BackgroundColor="#FBBF24">
+                                <Border.StrokeShape><RoundRectangle CornerRadius="8" /></Border.StrokeShape>
+                                <Border.Triggers>
+                                    <DataTrigger TargetType="Border" Binding="{Binding UserMarkerColor}" Value="#FBBF24">
+                                        <Setter Property="Stroke" Value="#FBBF24" />
+                                    </DataTrigger>
+                                </Border.Triggers>
+                                <Border.Stroke><SolidColorBrush Color="Transparent" /></Border.Stroke>
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding UpdateUserMarkerColorCommand}" CommandParameter="#FBBF24" />
+                                </Border.GestureRecognizers>
+                            </Border>
+                        </HorizontalStackLayout>
+                        <Grid ColumnDefinitions="Auto,Auto,Auto,Auto,*" ColumnSpacing="10">
+                            <Label Grid.Column="0" Text="현재:" Style="{StaticResource CaptionText}" TextColor="{StaticResource TextLightGray}" VerticalOptions="Center" />
+                            <Frame Grid.Column="1" WidthRequest="30" HeightRequest="30" CornerRadius="6" Padding="0" HasShadow="False" BackgroundColor="#60A5FA" />
+                            <Label Grid.Column="2" Text="→ 미리보기:" Style="{StaticResource CaptionText}" TextColor="{StaticResource TextLightGray}" VerticalOptions="Center" Margin="10,0,0,0" />
+                            <Frame Grid.Column="3" WidthRequest="30" HeightRequest="30" CornerRadius="6" Padding="0" HasShadow="False" BackgroundColor="{Binding UserMarkerColor}" />
+                            <Label Grid.Column="4" Text="{Binding UserMarkerColor}" Style="{StaticResource Body2}" TextColor="{StaticResource AccentSecondary}" VerticalOptions="Center" />
+                        </Grid>
+                    </VerticalStackLayout>
 
                     <!-- Assistant Marker Color -->
-                    <Grid ColumnDefinitions="*,Auto">
+                    <VerticalStackLayout Spacing="8">
                         <Label 
-                            Grid.Column="0"
                             Text="활동지원사 마커 색상"
                             Style="{StaticResource Body1}"
-                            TextColor="{StaticResource TextLightGray}"
-                            VerticalOptions="Center" />
-                        <Frame 
-                            Grid.Column="1"
-                            WidthRequest="80"
-                            HeightRequest="40"
-                            CornerRadius="8"
-                            Padding="0"
-                            HasShadow="False"
-                            BorderColor="{StaticResource TextTertiary}"
-                            BackgroundColor="{Binding AssistantMarkerColor}" />
-                    </Grid>
+                            TextColor="{StaticResource TextLightGray}" />
+                        <HorizontalStackLayout Spacing="10">
+                            <Border WidthRequest="50" HeightRequest="50" StrokeThickness="3" BackgroundColor="#FB923C">
+                                <Border.StrokeShape><RoundRectangle CornerRadius="8" /></Border.StrokeShape>
+                                <Border.Triggers>
+                                    <DataTrigger TargetType="Border" Binding="{Binding AssistantMarkerColor}" Value="#FB923C">
+                                        <Setter Property="Stroke" Value="#FBBF24" />
+                                    </DataTrigger>
+                                </Border.Triggers>
+                                <Border.Stroke><SolidColorBrush Color="Transparent" /></Border.Stroke>
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding UpdateAssistantMarkerColorCommand}" CommandParameter="#FB923C" />
+                                </Border.GestureRecognizers>
+                            </Border>
+                            <Border WidthRequest="50" HeightRequest="50" StrokeThickness="3" BackgroundColor="#F87171">
+                                <Border.StrokeShape><RoundRectangle CornerRadius="8" /></Border.StrokeShape>
+                                <Border.Triggers>
+                                    <DataTrigger TargetType="Border" Binding="{Binding AssistantMarkerColor}" Value="#F87171">
+                                        <Setter Property="Stroke" Value="#FBBF24" />
+                                    </DataTrigger>
+                                </Border.Triggers>
+                                <Border.Stroke><SolidColorBrush Color="Transparent" /></Border.Stroke>
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding UpdateAssistantMarkerColorCommand}" CommandParameter="#F87171" />
+                                </Border.GestureRecognizers>
+                            </Border>
+                            <Border WidthRequest="50" HeightRequest="50" StrokeThickness="3" BackgroundColor="#FBBF24">
+                                <Border.StrokeShape><RoundRectangle CornerRadius="8" /></Border.StrokeShape>
+                                <Border.Triggers>
+                                    <DataTrigger TargetType="Border" Binding="{Binding AssistantMarkerColor}" Value="#FBBF24">
+                                        <Setter Property="Stroke" Value="#FBBF24" />
+                                    </DataTrigger>
+                                </Border.Triggers>
+                                <Border.Stroke><SolidColorBrush Color="Transparent" /></Border.Stroke>
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding UpdateAssistantMarkerColorCommand}" CommandParameter="#FBBF24" />
+                                </Border.GestureRecognizers>
+                            </Border>
+                            <Border WidthRequest="50" HeightRequest="50" StrokeThickness="3" BackgroundColor="#A78BFA">
+                                <Border.StrokeShape><RoundRectangle CornerRadius="8" /></Border.StrokeShape>
+                                <Border.Triggers>
+                                    <DataTrigger TargetType="Border" Binding="{Binding AssistantMarkerColor}" Value="#A78BFA">
+                                        <Setter Property="Stroke" Value="#FBBF24" />
+                                    </DataTrigger>
+                                </Border.Triggers>
+                                <Border.Stroke><SolidColorBrush Color="Transparent" /></Border.Stroke>
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding UpdateAssistantMarkerColorCommand}" CommandParameter="#A78BFA" />
+                                </Border.GestureRecognizers>
+                            </Border>
+                            <Border WidthRequest="50" HeightRequest="50" StrokeThickness="3" BackgroundColor="#34D399">
+                                <Border.StrokeShape><RoundRectangle CornerRadius="8" /></Border.StrokeShape>
+                                <Border.Triggers>
+                                    <DataTrigger TargetType="Border" Binding="{Binding AssistantMarkerColor}" Value="#34D399">
+                                        <Setter Property="Stroke" Value="#FBBF24" />
+                                    </DataTrigger>
+                                </Border.Triggers>
+                                <Border.Stroke><SolidColorBrush Color="Transparent" /></Border.Stroke>
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding UpdateAssistantMarkerColorCommand}" CommandParameter="#34D399" />
+                                </Border.GestureRecognizers>
+                            </Border>
+                        </HorizontalStackLayout>
+                        <Grid ColumnDefinitions="Auto,Auto,Auto,Auto,*" ColumnSpacing="10">
+                            <Label Grid.Column="0" Text="현재:" Style="{StaticResource CaptionText}" TextColor="{StaticResource TextLightGray}" VerticalOptions="Center" />
+                            <Frame Grid.Column="1" WidthRequest="30" HeightRequest="30" CornerRadius="6" Padding="0" HasShadow="False" BackgroundColor="#FB923C" />
+                            <Label Grid.Column="2" Text="→ 미리보기:" Style="{StaticResource CaptionText}" TextColor="{StaticResource TextLightGray}" VerticalOptions="Center" Margin="10,0,0,0" />
+                            <Frame Grid.Column="3" WidthRequest="30" HeightRequest="30" CornerRadius="6" Padding="0" HasShadow="False" BackgroundColor="{Binding AssistantMarkerColor}" />
+                            <Label Grid.Column="4" Text="{Binding AssistantMarkerColor}" Style="{StaticResource Body2}" TextColor="{StaticResource AccentSecondary}" VerticalOptions="Center" />
+                        </Grid>
+                    </VerticalStackLayout>
 
                     <!-- Marker Size -->
                     <VerticalStackLayout Spacing="8">
@@ -69,42 +188,21 @@
                             Style="{StaticResource Body1}"
                             TextColor="{StaticResource TextLightGray}" />
                         <HorizontalStackLayout Spacing="10">
-                            <Button 
-                                Text="Small"
-                                Command="{Binding UpdateMarkerSizeCommand}"
-                                CommandParameter="Small"
-                                BackgroundColor="{StaticResource SurfaceDarkNavy}"
-                                TextColor="{StaticResource TextWhite}"
-                                Padding="15,8"
-                                CornerRadius="6">
+                            <Button Text="Small" Command="{Binding UpdateMarkerSizeCommand}" CommandParameter="Small" BackgroundColor="{StaticResource SurfaceDarkNavy}" TextColor="{StaticResource TextWhite}" Padding="15,8" CornerRadius="6">
                                 <Button.Triggers>
                                     <DataTrigger TargetType="Button" Binding="{Binding MarkerSize}" Value="Small">
                                         <Setter Property="BackgroundColor" Value="{StaticResource PrimaryCTA}" />
                                     </DataTrigger>
                                 </Button.Triggers>
                             </Button>
-                            <Button 
-                                Text="Medium"
-                                Command="{Binding UpdateMarkerSizeCommand}"
-                                CommandParameter="Medium"
-                                BackgroundColor="{StaticResource SurfaceDarkNavy}"
-                                TextColor="{StaticResource TextWhite}"
-                                Padding="15,8"
-                                CornerRadius="6">
+                            <Button Text="Medium" Command="{Binding UpdateMarkerSizeCommand}" CommandParameter="Medium" BackgroundColor="{StaticResource SurfaceDarkNavy}" TextColor="{StaticResource TextWhite}" Padding="15,8" CornerRadius="6">
                                 <Button.Triggers>
                                     <DataTrigger TargetType="Button" Binding="{Binding MarkerSize}" Value="Medium">
                                         <Setter Property="BackgroundColor" Value="{StaticResource PrimaryCTA}" />
                                     </DataTrigger>
                                 </Button.Triggers>
                             </Button>
-                            <Button 
-                                Text="Large"
-                                Command="{Binding UpdateMarkerSizeCommand}"
-                                CommandParameter="Large"
-                                BackgroundColor="{StaticResource SurfaceDarkNavy}"
-                                TextColor="{StaticResource TextWhite}"
-                                Padding="15,8"
-                                CornerRadius="6">
+                            <Button Text="Large" Command="{Binding UpdateMarkerSizeCommand}" CommandParameter="Large" BackgroundColor="{StaticResource SurfaceDarkNavy}" TextColor="{StaticResource TextWhite}" Padding="15,8" CornerRadius="6">
                                 <Button.Triggers>
                                     <DataTrigger TargetType="Button" Binding="{Binding MarkerSize}" Value="Large">
                                         <Setter Property="BackgroundColor" Value="{StaticResource PrimaryCTA}" />
@@ -116,8 +214,97 @@
                 </VerticalStackLayout>
             </Frame>
 
+            <!-- Theme Settings -->
+            <Frame Grid.Row="2" Grid.Column="0" BackgroundColor="{StaticResource SurfaceDarkGray}" Padding="20" CornerRadius="12">
+                <VerticalStackLayout Spacing="15">
+                    <Label 
+                        Text="🌙 테마 설정"
+                        Style="{StaticResource Heading3}"
+                        TextColor="{StaticResource TextWhite}" />
+                    
+                    <!-- Dark Mode -->
+                    <Grid ColumnDefinitions="*,Auto">
+                        <Label 
+                            Grid.Column="0"
+                            Text="다크 모드"
+                            Style="{StaticResource Body1}"
+                            TextColor="{StaticResource TextLightGray}"
+                            VerticalOptions="Center" />
+                        <Switch 
+                            Grid.Column="1"
+                            IsToggled="{Binding IsDarkMode}"
+                            OnColor="{StaticResource PrimaryCTA}"
+                            ThumbColor="{StaticResource TextWhite}" />
+                    </Grid>
+
+                    <!-- Font Size -->
+                    <VerticalStackLayout Spacing="8">
+                        <Label 
+                            Text="글꼴 크기"
+                            Style="{StaticResource Body1}"
+                            TextColor="{StaticResource TextLightGray}" />
+                        <HorizontalStackLayout Spacing="10">
+                            <Button Text="Small" Command="{Binding UpdateFontSizeCommand}" CommandParameter="Small" BackgroundColor="{StaticResource SurfaceDarkNavy}" TextColor="{StaticResource TextWhite}" Padding="15,8" CornerRadius="6">
+                                <Button.Triggers>
+                                    <DataTrigger TargetType="Button" Binding="{Binding FontSize}" Value="Small">
+                                        <Setter Property="BackgroundColor" Value="{StaticResource PrimaryCTA}" />
+                                    </DataTrigger>
+                                </Button.Triggers>
+                            </Button>
+                            <Button Text="Medium" Command="{Binding UpdateFontSizeCommand}" CommandParameter="Medium" BackgroundColor="{StaticResource SurfaceDarkNavy}" TextColor="{StaticResource TextWhite}" Padding="15,8" CornerRadius="6">
+                                <Button.Triggers>
+                                    <DataTrigger TargetType="Button" Binding="{Binding FontSize}" Value="Medium">
+                                        <Setter Property="BackgroundColor" Value="{StaticResource PrimaryCTA}" />
+                                    </DataTrigger>
+                                </Button.Triggers>
+                            </Button>
+                            <Button Text="Large" Command="{Binding UpdateFontSizeCommand}" CommandParameter="Large" BackgroundColor="{StaticResource SurfaceDarkNavy}" TextColor="{StaticResource TextWhite}" Padding="15,8" CornerRadius="6">
+                                <Button.Triggers>
+                                    <DataTrigger TargetType="Button" Binding="{Binding FontSize}" Value="Large">
+                                        <Setter Property="BackgroundColor" Value="{StaticResource PrimaryCTA}" />
+                                    </DataTrigger>
+                                </Button.Triggers>
+                            </Button>
+                        </HorizontalStackLayout>
+                    </VerticalStackLayout>
+
+                    <!-- Card Size -->
+                    <VerticalStackLayout Spacing="8">
+                        <Label 
+                            Text="카드 크기"
+                            Style="{StaticResource Body1}"
+                            TextColor="{StaticResource TextLightGray}" />
+                        <HorizontalStackLayout Spacing="10">
+                            <Button Text="Compact" Command="{Binding UpdateCardSizeCommand}" CommandParameter="Compact" BackgroundColor="{StaticResource SurfaceDarkNavy}" TextColor="{StaticResource TextWhite}" Padding="15,8" CornerRadius="6">
+                                <Button.Triggers>
+                                    <DataTrigger TargetType="Button" Binding="{Binding CardSize}" Value="Compact">
+                                        <Setter Property="BackgroundColor" Value="{StaticResource PrimaryCTA}" />
+                                    </DataTrigger>
+                                </Button.Triggers>
+                            </Button>
+                            <Button Text="Normal" Command="{Binding UpdateCardSizeCommand}" CommandParameter="Normal" BackgroundColor="{StaticResource SurfaceDarkNavy}" TextColor="{StaticResource TextWhite}" Padding="15,8" CornerRadius="6">
+                                <Button.Triggers>
+                                    <DataTrigger TargetType="Button" Binding="{Binding CardSize}" Value="Normal">
+                                        <Setter Property="BackgroundColor" Value="{StaticResource PrimaryCTA}" />
+                                    </DataTrigger>
+                                </Button.Triggers>
+                            </Button>
+                            <Button Text="Large" Command="{Binding UpdateCardSizeCommand}" CommandParameter="Large" BackgroundColor="{StaticResource SurfaceDarkNavy}" TextColor="{StaticResource TextWhite}" Padding="15,8" CornerRadius="6">
+                                <Button.Triggers>
+                                    <DataTrigger TargetType="Button" Binding="{Binding CardSize}" Value="Large">
+                                        <Setter Property="BackgroundColor" Value="{StaticResource PrimaryCTA}" />
+                                    </DataTrigger>
+                                </Button.Triggers>
+                            </Button>
+                        </HorizontalStackLayout>
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- RIGHT COLUMN -->
+
             <!-- Circle Settings -->
-            <Frame BackgroundColor="{StaticResource SurfaceDarkGray}" Padding="20" CornerRadius="12">
+            <Frame Grid.Row="1" Grid.Column="1" BackgroundColor="{StaticResource SurfaceDarkGray}" Padding="20" CornerRadius="12">
                 <VerticalStackLayout Spacing="15">
                     <Label 
                         Text="🔘 반경 원 설정"
@@ -125,23 +312,81 @@
                         TextColor="{StaticResource TextWhite}" />
                     
                     <!-- Circle Color -->
-                    <Grid ColumnDefinitions="*,Auto">
+                    <VerticalStackLayout Spacing="8">
                         <Label 
-                            Grid.Column="0"
                             Text="원 색상"
                             Style="{StaticResource Body1}"
-                            TextColor="{StaticResource TextLightGray}"
-                            VerticalOptions="Center" />
-                        <Frame 
-                            Grid.Column="1"
-                            WidthRequest="80"
-                            HeightRequest="40"
-                            CornerRadius="8"
-                            Padding="0"
-                            HasShadow="False"
-                            BorderColor="{StaticResource TextTertiary}"
-                            BackgroundColor="{Binding CircleColor}" />
-                    </Grid>
+                            TextColor="{StaticResource TextLightGray}" />
+                        <HorizontalStackLayout Spacing="10">
+                            <Border WidthRequest="50" HeightRequest="50" StrokeThickness="3" BackgroundColor="#60A5FA">
+                                <Border.StrokeShape><RoundRectangle CornerRadius="8" /></Border.StrokeShape>
+                                <Border.Triggers>
+                                    <DataTrigger TargetType="Border" Binding="{Binding CircleColor}" Value="#60A5FA">
+                                        <Setter Property="Stroke" Value="#FBBF24" />
+                                    </DataTrigger>
+                                </Border.Triggers>
+                                <Border.Stroke><SolidColorBrush Color="Transparent" /></Border.Stroke>
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding UpdateCircleColorCommand}" CommandParameter="#60A5FA" />
+                                </Border.GestureRecognizers>
+                            </Border>
+                            <Border WidthRequest="50" HeightRequest="50" StrokeThickness="3" BackgroundColor="#34D399">
+                                <Border.StrokeShape><RoundRectangle CornerRadius="8" /></Border.StrokeShape>
+                                <Border.Triggers>
+                                    <DataTrigger TargetType="Border" Binding="{Binding CircleColor}" Value="#34D399">
+                                        <Setter Property="Stroke" Value="#FBBF24" />
+                                    </DataTrigger>
+                                </Border.Triggers>
+                                <Border.Stroke><SolidColorBrush Color="Transparent" /></Border.Stroke>
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding UpdateCircleColorCommand}" CommandParameter="#34D399" />
+                                </Border.GestureRecognizers>
+                            </Border>
+                            <Border WidthRequest="50" HeightRequest="50" StrokeThickness="3" BackgroundColor="#F472B6">
+                                <Border.StrokeShape><RoundRectangle CornerRadius="8" /></Border.StrokeShape>
+                                <Border.Triggers>
+                                    <DataTrigger TargetType="Border" Binding="{Binding CircleColor}" Value="#F472B6">
+                                        <Setter Property="Stroke" Value="#FBBF24" />
+                                    </DataTrigger>
+                                </Border.Triggers>
+                                <Border.Stroke><SolidColorBrush Color="Transparent" /></Border.Stroke>
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding UpdateCircleColorCommand}" CommandParameter="#F472B6" />
+                                </Border.GestureRecognizers>
+                            </Border>
+                            <Border WidthRequest="50" HeightRequest="50" StrokeThickness="3" BackgroundColor="#A78BFA">
+                                <Border.StrokeShape><RoundRectangle CornerRadius="8" /></Border.StrokeShape>
+                                <Border.Triggers>
+                                    <DataTrigger TargetType="Border" Binding="{Binding CircleColor}" Value="#A78BFA">
+                                        <Setter Property="Stroke" Value="#FBBF24" />
+                                    </DataTrigger>
+                                </Border.Triggers>
+                                <Border.Stroke><SolidColorBrush Color="Transparent" /></Border.Stroke>
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding UpdateCircleColorCommand}" CommandParameter="#A78BFA" />
+                                </Border.GestureRecognizers>
+                            </Border>
+                            <Border WidthRequest="50" HeightRequest="50" StrokeThickness="3" BackgroundColor="#FB923C">
+                                <Border.StrokeShape><RoundRectangle CornerRadius="8" /></Border.StrokeShape>
+                                <Border.Triggers>
+                                    <DataTrigger TargetType="Border" Binding="{Binding CircleColor}" Value="#FB923C">
+                                        <Setter Property="Stroke" Value="#FBBF24" />
+                                    </DataTrigger>
+                                </Border.Triggers>
+                                <Border.Stroke><SolidColorBrush Color="Transparent" /></Border.Stroke>
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding UpdateCircleColorCommand}" CommandParameter="#FB923C" />
+                                </Border.GestureRecognizers>
+                            </Border>
+                        </HorizontalStackLayout>
+                        <Grid ColumnDefinitions="Auto,Auto,Auto,Auto,*" ColumnSpacing="10">
+                            <Label Grid.Column="0" Text="현재:" Style="{StaticResource CaptionText}" TextColor="{StaticResource TextLightGray}" VerticalOptions="Center" />
+                            <Frame Grid.Column="1" WidthRequest="30" HeightRequest="30" CornerRadius="6" Padding="0" HasShadow="False" BackgroundColor="#60A5FA" />
+                            <Label Grid.Column="2" Text="→ 미리보기:" Style="{StaticResource CaptionText}" TextColor="{StaticResource TextLightGray}" VerticalOptions="Center" Margin="10,0,0,0" />
+                            <Frame Grid.Column="3" WidthRequest="30" HeightRequest="30" CornerRadius="6" Padding="0" HasShadow="False" BackgroundColor="{Binding CircleColor}" />
+                            <Label Grid.Column="4" Text="{Binding CircleColor}" Style="{StaticResource Body2}" TextColor="{StaticResource AccentSecondary}" VerticalOptions="Center" />
+                        </Grid>
+                    </VerticalStackLayout>
 
                     <!-- Circle Opacity -->
                     <VerticalStackLayout Spacing="8">
@@ -162,7 +407,8 @@
                             Minimum="0"
                             Maximum="1"
                             MinimumTrackColor="{StaticResource PrimaryCTA}"
-                            MaximumTrackColor="{StaticResource SurfaceDarkNavy}" />
+                            MaximumTrackColor="{StaticResource TextTertiary}"
+                            ThumbColor="{StaticResource PrimaryCTA}" />
                     </VerticalStackLayout>
 
                     <!-- Circle Border Width -->
@@ -184,186 +430,44 @@
                             Minimum="1"
                             Maximum="5"
                             MinimumTrackColor="{StaticResource PrimaryCTA}"
-                            MaximumTrackColor="{StaticResource SurfaceDarkNavy}" />
+                            MaximumTrackColor="{StaticResource TextTertiary}"
+                            ThumbColor="{StaticResource PrimaryCTA}" />
                     </VerticalStackLayout>
                 </VerticalStackLayout>
             </Frame>
 
-            <!-- Theme Settings -->
-            <Frame BackgroundColor="{StaticResource SurfaceDarkGray}" Padding="20" CornerRadius="12">
+            <!-- Action Buttons (Full Width) -->
+            <Frame Grid.Row="2" Grid.Column="1" BackgroundColor="{StaticResource SurfaceDarkGray}" Padding="20" CornerRadius="12">
                 <VerticalStackLayout Spacing="15">
                     <Label 
-                        Text="🌙 테마"
+                        Text="💾 설정 관리"
                         Style="{StaticResource Heading3}"
                         TextColor="{StaticResource TextWhite}" />
                     
-                    <Grid ColumnDefinitions="*,Auto">
-                        <Label 
-                            Grid.Column="0"
-                            Text="다크 모드"
-                            Style="{StaticResource Body1}"
-                            TextColor="{StaticResource TextLightGray}"
-                            VerticalOptions="Center" />
-                        <Switch 
-                            Grid.Column="1"
-                            IsToggled="{Binding IsDarkMode}"
-                            OnColor="{StaticResource PrimaryCTA}"
-                            ThumbColor="{StaticResource TextWhite}" />
-                    </Grid>
-
-                    <Label 
-                        Text="🚧 라이트 모드는 추후 구현 예정입니다."
-                        Style="{StaticResource Caption}"
-                        TextColor="{StaticResource TextLightGray}" />
-                </VerticalStackLayout>
-            </Frame>
-
-            <!-- UI Size Settings -->
-            <Frame BackgroundColor="{StaticResource SurfaceDarkGray}" Padding="20" CornerRadius="12">
-                <VerticalStackLayout Spacing="15">
-                    <Label 
-                        Text="📐 UI 크기"
-                        Style="{StaticResource Heading3}"
-                        TextColor="{StaticResource TextWhite}" />
+                    <Button 
+                        Text="설정 저장"
+                        Command="{Binding SaveSettingsCommand}"
+                        BackgroundColor="{StaticResource PrimaryCTA}"
+                        TextColor="{StaticResource TextWhite}"
+                        CornerRadius="8"
+                        Padding="20,15"
+                        FontSize="16"
+                        FontAttributes="Bold" />
                     
-                    <!-- Font Size -->
-                    <VerticalStackLayout Spacing="8">
-                        <Label 
-                            Text="폰트 크기"
-                            Style="{StaticResource Body1}"
-                            TextColor="{StaticResource TextLightGray}" />
-                        <HorizontalStackLayout Spacing="10">
-                            <Button 
-                                Text="Small"
-                                Command="{Binding UpdateFontSizeCommand}"
-                                CommandParameter="Small"
-                                BackgroundColor="{StaticResource SurfaceDarkNavy}"
-                                TextColor="{StaticResource TextWhite}"
-                                Padding="15,8"
-                                CornerRadius="6">
-                                <Button.Triggers>
-                                    <DataTrigger TargetType="Button" Binding="{Binding FontSize}" Value="Small">
-                                        <Setter Property="BackgroundColor" Value="{StaticResource PrimaryCTA}" />
-                                    </DataTrigger>
-                                </Button.Triggers>
-                            </Button>
-                            <Button 
-                                Text="Medium"
-                                Command="{Binding UpdateFontSizeCommand}"
-                                CommandParameter="Medium"
-                                BackgroundColor="{StaticResource SurfaceDarkNavy}"
-                                TextColor="{StaticResource TextWhite}"
-                                Padding="15,8"
-                                CornerRadius="6">
-                                <Button.Triggers>
-                                    <DataTrigger TargetType="Button" Binding="{Binding FontSize}" Value="Medium">
-                                        <Setter Property="BackgroundColor" Value="{StaticResource PrimaryCTA}" />
-                                    </DataTrigger>
-                                </Button.Triggers>
-                            </Button>
-                            <Button 
-                                Text="Large"
-                                Command="{Binding UpdateFontSizeCommand}"
-                                CommandParameter="Large"
-                                BackgroundColor="{StaticResource SurfaceDarkNavy}"
-                                TextColor="{StaticResource TextWhite}"
-                                Padding="15,8"
-                                CornerRadius="6">
-                                <Button.Triggers>
-                                    <DataTrigger TargetType="Button" Binding="{Binding FontSize}" Value="Large">
-                                        <Setter Property="BackgroundColor" Value="{StaticResource PrimaryCTA}" />
-                                    </DataTrigger>
-                                </Button.Triggers>
-                            </Button>
-                        </HorizontalStackLayout>
-                    </VerticalStackLayout>
-
-                    <!-- Card Size -->
-                    <VerticalStackLayout Spacing="8">
-                        <Label 
-                            Text="카드 크기"
-                            Style="{StaticResource Body1}"
-                            TextColor="{StaticResource TextLightGray}" />
-                        <HorizontalStackLayout Spacing="10">
-                            <Button 
-                                Text="Compact"
-                                Command="{Binding UpdateCardSizeCommand}"
-                                CommandParameter="Compact"
-                                BackgroundColor="{StaticResource SurfaceDarkNavy}"
-                                TextColor="{StaticResource TextWhite}"
-                                Padding="15,8"
-                                CornerRadius="6">
-                                <Button.Triggers>
-                                    <DataTrigger TargetType="Button" Binding="{Binding CardSize}" Value="Compact">
-                                        <Setter Property="BackgroundColor" Value="{StaticResource PrimaryCTA}" />
-                                    </DataTrigger>
-                                </Button.Triggers>
-                            </Button>
-                            <Button 
-                                Text="Normal"
-                                Command="{Binding UpdateCardSizeCommand}"
-                                CommandParameter="Normal"
-                                BackgroundColor="{StaticResource SurfaceDarkNavy}"
-                                TextColor="{StaticResource TextWhite}"
-                                Padding="15,8"
-                                CornerRadius="6">
-                                <Button.Triggers>
-                                    <DataTrigger TargetType="Button" Binding="{Binding CardSize}" Value="Normal">
-                                        <Setter Property="BackgroundColor" Value="{StaticResource PrimaryCTA}" />
-                                    </DataTrigger>
-                                </Button.Triggers>
-                            </Button>
-                            <Button 
-                                Text="Large"
-                                Command="{Binding UpdateCardSizeCommand}"
-                                CommandParameter="Large"
-                                BackgroundColor="{StaticResource SurfaceDarkNavy}"
-                                TextColor="{StaticResource TextWhite}"
-                                Padding="15,8"
-                                CornerRadius="6">
-                                <Button.Triggers>
-                                    <DataTrigger TargetType="Button" Binding="{Binding CardSize}" Value="Large">
-                                        <Setter Property="BackgroundColor" Value="{StaticResource PrimaryCTA}" />
-                                    </DataTrigger>
-                                </Button.Triggers>
-                            </Button>
-                        </HorizontalStackLayout>
-                    </VerticalStackLayout>
+                    <Button 
+                        Text="초기화"
+                        Command="{Binding ResetSettingsCommand}"
+                        BackgroundColor="{StaticResource SurfaceDarkNavy}"
+                        TextColor="{StaticResource TextLightGray}"
+                        BorderColor="{StaticResource TextTertiary}"
+                        BorderWidth="1"
+                        CornerRadius="8"
+                        Padding="20,15"
+                        FontSize="16" />
                 </VerticalStackLayout>
             </Frame>
 
-            <!-- Action Buttons -->
-            <Grid ColumnDefinitions="*,*" ColumnSpacing="10" Margin="0,10,0,20">
-                <Button 
-                    Grid.Column="0"
-                    Text="설정 초기화"
-                    Command="{Binding ResetSettingsCommand}"
-                    BackgroundColor="{StaticResource SurfaceDarkNavy}"
-                    TextColor="{StaticResource TextLightGray}"
-                    CornerRadius="8"
-                    Padding="15,12" />
-                <Button 
-                    Grid.Column="1"
-                    Text="설정 저장"
-                    Command="{Binding SaveSettingsCommand}"
-                    BackgroundColor="{StaticResource PrimaryCTA}"
-                    TextColor="{StaticResource TextWhite}"
-                    CornerRadius="8"
-                    Padding="15,12" />
-            </Grid>
-
-            <!-- Loading Indicator -->
-            <ActivityIndicator
-                IsRunning="{Binding IsLoading}"
-                IsVisible="{Binding IsLoading}"
-                Color="{StaticResource PrimaryCTA}"
-                WidthRequest="40"
-                HeightRequest="40"
-                HorizontalOptions="Center"
-                Margin="20" />
-
-        </VerticalStackLayout>
+        </Grid>
     </ScrollView>
 
 </ContentPage>
-

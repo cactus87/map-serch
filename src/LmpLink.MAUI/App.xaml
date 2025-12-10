@@ -17,6 +17,7 @@
             <converters:CenterModeToColorConverter x:Key="CenterModeToColorConverter" />
             <converters:CenterModeToKoreanConverter x:Key="CenterModeToKoreanConverter" />
             <converters:RadiusToColorConverter x:Key="RadiusToColorConverter" />
+            <converters:PersonTypeToKoreanConverter x:Key="PersonTypeToKoreanConverter" />
         </ResourceDictionary>
     </Application.Resources>
 </Application>

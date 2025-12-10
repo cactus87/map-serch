@@ -30,12 +30,14 @@
         </Grid>
 
         <!-- Filter Bar -->
-        <Grid Grid.Row="1" ColumnDefinitions="Auto,Auto,*,Auto" ColumnSpacing="10" Margin="0,0,0,15">
+        <Grid Grid.Row="1" ColumnDefinitions="Auto,Auto,Auto,*,Auto" ColumnSpacing="10" Margin="0,0,0,15">
             
             <!-- Type Filter: All -->
             <Button 
                 Grid.Column="0"
                 Text="전체"
+                Command="{Binding ApplyFilterCommand}"
+                CommandParameter="all"
                 BackgroundColor="{StaticResource SurfaceDarkGray}"
                 TextColor="{StaticResource TextWhite}"
                 Padding="15,10"
@@ -51,6 +53,8 @@
             <Button 
                 Grid.Column="1"
                 Text="이용자"
+                Command="{Binding ApplyFilterCommand}"
+                CommandParameter="user"
                 BackgroundColor="{StaticResource SurfaceDarkGray}"
                 TextColor="{StaticResource TextWhite}"
                 Padding="15,10"
@@ -62,9 +66,26 @@
                 </Button.Triggers>
             </Button>
 
+            <!-- Type Filter: Assistant -->
+            <Button 
+                Grid.Column="2"
+                Text="활동지원사"
+                Command="{Binding ApplyFilterCommand}"
+                CommandParameter="assistant"
+                BackgroundColor="{StaticResource SurfaceDarkGray}"
+                TextColor="{StaticResource TextWhite}"
+                Padding="15,10"
+                CornerRadius="8">
+                <Button.Triggers>
+                    <DataTrigger TargetType="Button" Binding="{Binding SelectedTypeFilter}" Value="assistant">
+                        <Setter Property="BackgroundColor" Value="{StaticResource MarkerAssistant}" />
+                    </DataTrigger>
+                </Button.Triggers>
+            </Button>
+
             <!-- Search Bar -->
             <SearchBar 
-                Grid.Column="2"
+                Grid.Column="3"
                 Placeholder="이름 또는 주소로 검색..."
                 Text="{Binding SearchText}"
                 BackgroundColor="{StaticResource SurfaceDarkGray}"
@@ -74,7 +95,7 @@
 
             <!-- Reload Button -->
             <Button 
-                Grid.Column="3"
+                Grid.Column="4"
                 Text="🔄"
                 Command="{Binding LoadDataCommand}"
                 BackgroundColor="{StaticResource AccentSecondary}"
