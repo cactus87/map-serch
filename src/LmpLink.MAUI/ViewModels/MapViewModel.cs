@@ -32,18 +32,24 @@ public partial class MapViewModel : BaseViewModel
     // --- Observable Properties ---
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(DisplayUsers))]
+    [NotifyPropertyChangedFor(nameof(DisplayAssistants))]
     private CenterMode _currentCenterMode = CenterMode.User; // Default: User-centric
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(DisplayUsers))]
     private ObservableCollection<Person> _users = new();
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(DisplayAssistants))]
     private ObservableCollection<Person> _assistants = new();
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(DisplayAssistants))]
     private ObservableCollection<Person> _filteredAssistants = new();
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(DisplayUsers))]
     private ObservableCollection<Person> _filteredUsers = new(); // For Assistant-centric mode
 
     [ObservableProperty]
@@ -63,6 +69,21 @@ public partial class MapViewModel : BaseViewModel
 
     [ObservableProperty]
     private int _assistantsInRadius; // For map overlay
+
+    // --- Computed Display Properties ---
+    // These switch based on current mode for proper list display
+
+    /// <summary>
+    /// Users to display in list: FilteredUsers (with distance) in Assistant mode, all Users in User mode.
+    /// </summary>
+    public ObservableCollection<Person> DisplayUsers => 
+        CurrentCenterMode == CenterMode.Assistant ? FilteredUsers : Users;
+
+    /// <summary>
+    /// Assistants to display in list: FilteredAssistants (with distance) in User mode, all Assistants in Assistant mode.
+    /// </summary>
+    public ObservableCollection<Person> DisplayAssistants => 
+        CurrentCenterMode == CenterMode.User ? FilteredAssistants : Assistants;
 
     // --- Constructor ---
 

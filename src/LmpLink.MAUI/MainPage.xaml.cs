@@ -188,14 +188,35 @@ public partial class MainPage : ContentPage
             // Focus on user marker
             await _mapService.FocusMarkerAsync(user.Id);
 
-            // Draw circle if User-centric mode
+            // User-centric mode: draw circle and update visibility immediately
             if (_viewModel.CurrentCenterMode == CenterMode.User)
             {
                 await _mapService.DrawCircleAsync(user.Latitude, user.Longitude, _viewModel.CurrentRadius);
+                
+                // Update marker visibility directly here (don't wait for FilteredAssistants change)
+                var filteredIds = _viewModel.FilteredAssistants.Select(a => a.Id).ToHashSet();
+                
+                foreach (var assistant in _viewModel.Assistants)
+                {
+                    var isVisible = filteredIds.Contains(assistant.Id);
+                    await _mapService.SetMarkerVisibleAsync(assistant.Id, isVisible);
+                }
+                
+                // Show only selected user
+                foreach (var u in _viewModel.Users)
+                {
+                    await _mapService.SetMarkerVisibleAsync(u.Id, u.Id == user.Id);
+                }
+                
+                await UpdateMarkerCountsFromMap();
             }
-            
-            // Update counts after drawing
-            await UpdateMarkerCountsFromMap();
+            // In Assistant mode: show clicked user + selected assistant + filtered users
+            else
+            {
+                // Make clicked user visible (even if outside radius)
+                await _mapService.SetMarkerVisibleAsync(user.Id, true);
+                await UpdateMarkerCountsFromMap();
+            }
         }
     }
 
@@ -219,14 +240,35 @@ public partial class MainPage : ContentPage
             // Focus on assistant marker
             await _mapService.FocusMarkerAsync(assistant.Id);
 
-            // Draw circle if Assistant-centric mode
+            // Assistant-centric mode: draw circle and update visibility immediately
             if (_viewModel.CurrentCenterMode == CenterMode.Assistant)
             {
                 await _mapService.DrawCircleAsync(assistant.Latitude, assistant.Longitude, _viewModel.CurrentRadius);
+                
+                // Update marker visibility directly here (don't wait for FilteredUsers change)
+                var filteredIds = _viewModel.FilteredUsers.Select(u => u.Id).ToHashSet();
+                
+                foreach (var user in _viewModel.Users)
+                {
+                    var isVisible = filteredIds.Contains(user.Id);
+                    await _mapService.SetMarkerVisibleAsync(user.Id, isVisible);
+                }
+                
+                // Show only selected assistant
+                foreach (var a in _viewModel.Assistants)
+                {
+                    await _mapService.SetMarkerVisibleAsync(a.Id, a.Id == assistant.Id);
+                }
+                
+                await UpdateMarkerCountsFromMap();
             }
-            
-            // Update counts after drawing
-            await UpdateMarkerCountsFromMap();
+            // In User mode: show clicked assistant + selected user + filtered assistants
+            else
+            {
+                // Make clicked assistant visible (even if outside radius)
+                await _mapService.SetMarkerVisibleAsync(assistant.Id, true);
+                await UpdateMarkerCountsFromMap();
+            }
         }
     }
 
@@ -254,56 +296,56 @@ public partial class MainPage : ContentPage
 
     private async Task HandleFilteredAssistantsChanged()
     {
+        // Visibility is now handled in HandleSelectedUserChanged to avoid race conditions
+        // This handler is kept for radius change updates only
         if (_viewModel == null || _mapService == null) return;
+        if (_viewModel.CurrentCenterMode != CenterMode.User) return;
+        if (_viewModel.SelectedUser == null) return;
 
-        // Only filter markers if in User-centric mode
-        if (_viewModel.CurrentCenterMode == CenterMode.User)
+        MauiProgram.Log($"[HandleFilteredAssistantsChanged] Count: {_viewModel.FilteredAssistants.Count}");
+
+        var filteredIds = _viewModel.FilteredAssistants.Select(a => a.Id).ToHashSet();
+        var selectedUserId = _viewModel.SelectedUser.Id;
+
+        foreach (var assistant in _viewModel.Assistants)
         {
-            // Update marker visibility based on filtered results
-            var filteredIds = _viewModel.FilteredAssistants.Select(a => a.Id).ToHashSet();
-
-            foreach (var assistant in _viewModel.Assistants)
-            {
-                var isVisible = filteredIds.Contains(assistant.Id);
-                await _mapService.SetMarkerVisibleAsync(assistant.Id, isVisible);
-            }
-
-            // Always show user markers
-            foreach (var user in _viewModel.Users)
-            {
-                await _mapService.SetMarkerVisibleAsync(user.Id, true);
-            }
-
-            // Update counts from JavaScript (실제 지도에 표시된 마커 개수)
-            await UpdateMarkerCountsFromMap();
+            var isVisible = filteredIds.Contains(assistant.Id);
+            await _mapService.SetMarkerVisibleAsync(assistant.Id, isVisible);
         }
+
+        foreach (var user in _viewModel.Users)
+        {
+            await _mapService.SetMarkerVisibleAsync(user.Id, user.Id == selectedUserId);
+        }
+
+        await UpdateMarkerCountsFromMap();
     }
 
     private async Task HandleFilteredUsersChanged()
     {
+        // Visibility is now handled in HandleSelectedAssistantChanged to avoid race conditions
+        // This handler is kept for radius change updates only
         if (_viewModel == null || _mapService == null) return;
+        if (_viewModel.CurrentCenterMode != CenterMode.Assistant) return;
+        if (_viewModel.SelectedAssistant == null) return;
 
-        // Only filter markers if in Assistant-centric mode
-        if (_viewModel.CurrentCenterMode == CenterMode.Assistant)
+        MauiProgram.Log($"[HandleFilteredUsersChanged] Count: {_viewModel.FilteredUsers.Count}");
+
+        var filteredIds = _viewModel.FilteredUsers.Select(u => u.Id).ToHashSet();
+        var selectedAssistantId = _viewModel.SelectedAssistant.Id;
+
+        foreach (var user in _viewModel.Users)
         {
-            // Update marker visibility based on filtered results
-            var filteredIds = _viewModel.FilteredUsers.Select(u => u.Id).ToHashSet();
-
-            foreach (var user in _viewModel.Users)
-            {
-                var isVisible = filteredIds.Contains(user.Id);
-                await _mapService.SetMarkerVisibleAsync(user.Id, isVisible);
-            }
-
-            // Always show assistant markers
-            foreach (var assistant in _viewModel.Assistants)
-            {
-                await _mapService.SetMarkerVisibleAsync(assistant.Id, true);
-            }
-
-            // Update counts from JavaScript (실제 지도에 표시된 마커 개수)
-            await UpdateMarkerCountsFromMap();
+            var isVisible = filteredIds.Contains(user.Id);
+            await _mapService.SetMarkerVisibleAsync(user.Id, isVisible);
         }
+
+        foreach (var assistant in _viewModel.Assistants)
+        {
+            await _mapService.SetMarkerVisibleAsync(assistant.Id, assistant.Id == selectedAssistantId);
+        }
+
+        await UpdateMarkerCountsFromMap();
     }
 
     private async Task UpdateMarkerCountsFromMap()

@@ -52,8 +52,11 @@
                     <Button 
                         Grid.Row="0" Grid.Column="0"
                         Text="1km"
-                        Style="{StaticResource SecondaryButton}"
-                        Command="{Binding ChangeRadiusCommand}">
+                        Command="{Binding ChangeRadiusCommand}"
+                        BackgroundColor="{Binding CurrentRadius, Converter={StaticResource RadiusToColorConverter}, ConverterParameter=1}"
+                        TextColor="White"
+                        FontSize="14"
+                        Padding="10,8">
                         <Button.CommandParameter>
                             <x:Double>1.0</x:Double>
                         </Button.CommandParameter>
@@ -61,8 +64,11 @@
                     <Button 
                         Grid.Row="0" Grid.Column="1"
                         Text="3km"
-                        Style="{StaticResource SecondaryButton}"
-                        Command="{Binding ChangeRadiusCommand}">
+                        Command="{Binding ChangeRadiusCommand}"
+                        BackgroundColor="{Binding CurrentRadius, Converter={StaticResource RadiusToColorConverter}, ConverterParameter=3}"
+                        TextColor="White"
+                        FontSize="14"
+                        Padding="10,8">
                         <Button.CommandParameter>
                             <x:Double>3.0</x:Double>
                         </Button.CommandParameter>
@@ -70,8 +76,11 @@
                     <Button 
                         Grid.Row="1" Grid.Column="0"
                         Text="5km"
-                        Style="{StaticResource SecondaryButton}"
-                        Command="{Binding ChangeRadiusCommand}">
+                        Command="{Binding ChangeRadiusCommand}"
+                        BackgroundColor="{Binding CurrentRadius, Converter={StaticResource RadiusToColorConverter}, ConverterParameter=5}"
+                        TextColor="White"
+                        FontSize="14"
+                        Padding="10,8">
                         <Button.CommandParameter>
                             <x:Double>5.0</x:Double>
                         </Button.CommandParameter>
@@ -79,8 +88,11 @@
                     <Button 
                         Grid.Row="1" Grid.Column="1"
                         Text="전체"
-                        Style="{StaticResource SecondaryButton}"
-                        Command="{Binding ShowAllCommand}" />
+                        Command="{Binding ShowAllCommand}"
+                        BackgroundColor="{Binding CurrentRadius, Converter={StaticResource RadiusToColorConverter}, ConverterParameter=0}"
+                        TextColor="White"
+                        FontSize="14"
+                        Padding="10,8" />
                 </Grid>
             </VerticalStackLayout>
 
@@ -103,14 +115,12 @@
             <!-- Users CollectionView -->
             <CollectionView
                 Grid.Row="4"
-                ItemsSource="{Binding Users}"
-                SelectionMode="Single"
-                SelectedItem="{Binding SelectedUser}"
+                ItemsSource="{Binding DisplayUsers}"
                 BackgroundColor="{StaticResource BackgroundDeepNavy}"
                 HeightRequest="200">
                 <CollectionView.Header>
                     <Label 
-                        Text="이용자 목록 (10명)"
+                        Text="{Binding DisplayUsers.Count, StringFormat='이용자 목록 ({0}명)'}"
                         Style="{StaticResource SmallText}"
                         FontAttributes="Bold"
                         Padding="10,10,10,5" />
@@ -124,7 +134,12 @@
                             BorderColor="{StaticResource TextTertiary}"
                             BackgroundColor="{StaticResource SurfaceDarkGray}"
                             HasShadow="True">
-                            <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="Auto,*">
+                            <Frame.GestureRecognizers>
+                                <TapGestureRecognizer 
+                                    Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MapViewModel}}, Path=SelectUserCommand}"
+                                    CommandParameter="{Binding}" />
+                            </Frame.GestureRecognizers>
+                            <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="Auto,*,Auto">
                                 <!-- Blue Circle Icon (User Marker) -->
                                 <BoxView 
                                     Grid.Row="0" Grid.Column="0"
@@ -149,6 +164,16 @@
                                         Style="{StaticResource CaptionText}"
                                         IsVisible="{Binding Phone, Converter={StaticResource IsNotNullConverter}}" />
                                 </VerticalStackLayout>
+
+                                <!-- Distance (shown in Assistant mode) -->
+                                <Label 
+                                    Grid.Row="0" Grid.Column="2"
+                                    Text="{Binding DistanceKm, StringFormat='{0:F1}km'}"
+                                    Style="{StaticResource CaptionText}"
+                                    FontAttributes="Bold"
+                                    TextColor="{StaticResource PrimaryCTA}"
+                                    VerticalOptions="Center"
+                                    IsVisible="{Binding DistanceKm, Converter={StaticResource IsNotNullConverter}}" />
                             </Grid>
                         </Frame>
                     </DataTemplate>
@@ -158,11 +183,11 @@
             <!-- Assistants CollectionView -->
             <CollectionView
                 Grid.Row="5"
-                ItemsSource="{Binding FilteredAssistants}"
+                ItemsSource="{Binding DisplayAssistants}"
                 BackgroundColor="{StaticResource BackgroundDeepNavy}">
                 <CollectionView.Header>
                     <Label 
-                        Text="{Binding FilteredAssistants.Count, StringFormat='활동지원사 목록 ({0}명)'}"
+                        Text="{Binding DisplayAssistants.Count, StringFormat='활동지원사 목록 ({0}명)'}"
                         Style="{StaticResource SmallText}"
                         FontAttributes="Bold"
                         Padding="10,10,10,5" />

@@ -28,6 +28,7 @@
         let markers = {};
         let currentCircle = null;
         let highlightedMarker = null; // Currently highlighted marker
+        let openInfoWindows = []; // Track all open info windows
         
         // Auth failure handler
         window.navermap_authFailure = function() {
@@ -57,6 +58,12 @@
                 };
                 
                 map = new naver.maps.Map('map', mapOptions);
+                
+                // Close all info windows when clicking on empty map area
+                naver.maps.Event.addListener(map, 'click', function() {
+                    closeAllInfoWindows();
+                });
+                
                 console.log('Map initialized successfully');
                 return true;
             } catch (error) {
@@ -95,19 +102,48 @@
                 marker._personName = name;
                 marker._personAddress = address;
                 
-                // Info window on click
+                // Info window with same transparency as radius overlay (#B0000000 = 69% opacity)
                 const infoWindow = new naver.maps.InfoWindow({
-                    content: `<div style="padding:10px;min-width:150px;">
-                                <h4 style="margin:0 0 5px 0;">${name}</h4>
-                                <p style="margin:0;font-size:12px;color:#666;">${address || '주소 정보 없음'}</p>
-                              </div>`
+                    content: `<div style="
+                        padding: 12px 16px;
+                        min-width: 160px;
+                        background: rgba(0, 0, 0, 0.69);
+                        border-radius: 8px;
+                        border: 1px solid rgba(255, 255, 255, 0.1);
+                    ">
+                        <h4 style="
+                            margin: 0 0 6px 0;
+                            color: white;
+                            font-size: 15px;
+                            font-weight: bold;
+                        ">${name}</h4>
+                        <p style="
+                            margin: 0;
+                            font-size: 13px;
+                            color: #DDDDDD;
+                            line-height: 1.4;
+                        ">${address || '주소 정보 없음'}</p>
+                    </div>`,
+                    borderWidth: 0,
+                    backgroundColor: 'transparent',
+                    anchorSize: new naver.maps.Size(0, 0),
+                    pixelOffset: new naver.maps.Point(0, -10)
                 });
                 
-                naver.maps.Event.addListener(marker, 'click', function() {
+                // Store info window reference
+                marker._infoWindow = infoWindow;
+                
+                naver.maps.Event.addListener(marker, 'click', function(e) {
+                    // Prevent map click event
+                    e.domEvent.stopPropagation();
+                    
                     if (infoWindow.getMap()) {
                         infoWindow.close();
+                        removeFromOpenInfoWindows(infoWindow);
                     } else {
+                        closeAllInfoWindows(); // Close all others first
                         infoWindow.open(map, marker);
+                        openInfoWindows.push(infoWindow);
                     }
                 });
                 
@@ -265,14 +301,35 @@
                 map.setCenter(marker.getPosition());
                 map.setZoom(15); // Zoom in
                 
-                // Trigger click event to open InfoWindow
-                naver.maps.Event.trigger(marker, 'click');
+                // Open InfoWindow (close others first)
+                const infoWindow = marker._infoWindow;
+                if (infoWindow) {
+                    closeAllInfoWindows();
+                    infoWindow.open(map, marker);
+                    openInfoWindows.push(infoWindow);
+                }
                 
-                console.log(`✨ Focused on marker ${markerId} with highlight`);
+                console.log(`✨ Focused on marker ${markerId} with highlight and InfoWindow`);
                 return true;
             } catch (error) {
                 console.error('Focus marker failed:', error);
                 return false;
+            }
+        }
+        
+        // Close all info windows
+        function closeAllInfoWindows() {
+            openInfoWindows.forEach(infoWindow => {
+                infoWindow.close();
+            });
+            openInfoWindows = [];
+        }
+        
+        // Remove info window from tracking array
+        function removeFromOpenInfoWindows(infoWindow) {
+            const index = openInfoWindows.indexOf(infoWindow);
+            if (index > -1) {
+                openInfoWindows.splice(index, 1);
             }
         }
         

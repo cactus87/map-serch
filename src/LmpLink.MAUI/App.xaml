@@ -16,6 +16,7 @@
             <converters:IsNotNullConverter x:Key="IsNotNullConverter" />
             <converters:CenterModeToColorConverter x:Key="CenterModeToColorConverter" />
             <converters:CenterModeToKoreanConverter x:Key="CenterModeToKoreanConverter" />
+            <converters:RadiusToColorConverter x:Key="RadiusToColorConverter" />
         </ResourceDictionary>
     </Application.Resources>
 </Application>

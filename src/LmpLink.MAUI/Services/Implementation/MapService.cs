@@ -301,7 +301,10 @@ public class MapService : IMapService
 
     private class MarkerCountResult
     {
+        [System.Text.Json.Serialization.JsonPropertyName("users")]
         public int Users { get; set; }
+        
+        [System.Text.Json.Serialization.JsonPropertyName("assistants")]
         public int Assistants { get; set; }
     }
 }
