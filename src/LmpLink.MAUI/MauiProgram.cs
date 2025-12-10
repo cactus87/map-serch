@@ -57,10 +57,14 @@ public static class MauiProgram
 
             // Register ViewModels
             builder.Services.AddTransient<MapViewModel>();
+            builder.Services.AddTransient<ManagementViewModel>();
             Log("[4] ViewModels registered");
 
             // Register Pages
-            builder.Services.AddTransient<MainPage>();
+            builder.Services.AddTransient<Views.Pages.MapPage>();
+            builder.Services.AddTransient<Views.Pages.ManagementPage>();
+            builder.Services.AddTransient<Views.Pages.DataPage>();
+            builder.Services.AddTransient<Views.Pages.SettingsPage>();
             builder.Services.AddTransient<TestPage>();
             Log("[5] Pages registered");
 

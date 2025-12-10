@@ -71,6 +71,12 @@ public partial class MapViewModel : BaseViewModel
     [ObservableProperty]
     private int _assistantsInRadius; // For map overlay
 
+    [ObservableProperty]
+    private Person? _selectedPerson; // For slide-out panel
+
+    [ObservableProperty]
+    private bool _isDetailPanelVisible; // Show/hide panel
+
     // --- Computed Display Properties ---
     // These switch based on current mode for proper list display
 
@@ -365,5 +371,55 @@ public partial class MapViewModel : BaseViewModel
                 FilterStatusText = $"{CurrentRadius}km 내 {FilteredUsers.Count}명";
             }
         }
+    }
+
+    // --- Detail Panel Commands ---
+
+    /// <summary>
+    /// Show detail panel for a person (from marker click or list click).
+    /// </summary>
+    [RelayCommand]
+    private void ShowPersonDetail(Person? person)
+    {
+        if (person == null)
+        {
+            return;
+        }
+
+        MauiProgram.Log($"[MapViewModel] ShowPersonDetail: {person.Name} ({person.Type})");
+        SelectedPerson = person;
+        IsDetailPanelVisible = true;
+    }
+
+    /// <summary>
+    /// Close the detail panel.
+    /// </summary>
+    [RelayCommand]
+    private void CloseDetailPanel()
+    {
+        MauiProgram.Log("[MapViewModel] CloseDetailPanel");
+        IsDetailPanelVisible = false;
+        SelectedPerson = null;
+    }
+
+    /// <summary>
+    /// Navigate to ManagementPage to edit person details.
+    /// </summary>
+    [RelayCommand]
+    private async Task EditPersonDetailsAsync()
+    {
+        if (SelectedPerson == null)
+        {
+            return;
+        }
+
+        MauiProgram.Log($"[MapViewModel] EditPersonDetails: {SelectedPerson.Name}");
+        
+        // Navigate to ManagementPage with person ID
+        // TODO: Implement navigation with parameter in Week 3 Day 19-21
+        await Shell.Current.GoToAsync($"//ManagementPage?personId={SelectedPerson.Id}");
+        
+        // Close panel after navigation
+        CloseDetailPanel();
     }
 }

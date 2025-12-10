@@ -10,4 +10,7 @@
     <!-- Custom Converter: Check if value is not null -->
     <converters:IsNotNullConverter x:Key="IsNotNullConverter" />
 
+    <!-- Custom Converter: Person Type to Korean -->
+    <converters:PersonTypeToKoreanConverter x:Key="PersonTypeToKoreanConverter" />
+
 </ResourceDictionary>

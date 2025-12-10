@@ -43,3 +43,28 @@ public class InvertedBoolConverter : IValueConverter
         return false;
     }
 }
+
+/// <summary>
+/// Converter: converts Person.Type (user/assistant) to Korean.
+/// </summary>
+public class PersonTypeToKoreanConverter : IValueConverter
+{
+    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+    {
+        if (value is string type)
+        {
+            return type.ToLower() switch
+            {
+                "user" => "이용자",
+                "assistant" => "활동지원사",
+                _ => type
+            };
+        }
+        return string.Empty;
+    }
+
+    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
+    {
+        throw new NotImplementedException();
+    }
+}

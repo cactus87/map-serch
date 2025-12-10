@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="LmpLink.MAUI.Views.Pages.DataPage"
+             Title="데이터"
+             BackgroundColor="{StaticResource BackgroundDeepNavy}">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="20">
+            
+            <!-- Title -->
+            <Label 
+                Text="📥 데이터 관리"
+                Style="{StaticResource Heading1}"
+                TextColor="{StaticResource PrimaryCTA}" />
+
+            <!-- Excel Export -->
+            <Frame BackgroundColor="{StaticResource SurfaceDarkGray}" Padding="20" CornerRadius="12">
+                <VerticalStackLayout Spacing="10">
+                    <Label 
+                        Text="📤 엑셀 내보내기"
+                        Style="{StaticResource Heading3}"
+                        TextColor="{StaticResource TextWhite}" />
+                    <Label 
+                        Text="현재 데이터를 엑셀 파일로 저장합니다."
+                        Style="{StaticResource Body2}"
+                        TextColor="{StaticResource TextLightGray}" />
+                    <Button 
+                        Text="엑셀로 내보내기"
+                        BackgroundColor="{StaticResource AccentSecondary}"
+                        TextColor="{StaticResource TextWhite}"
+                        CornerRadius="8"
+                        Padding="15,10" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Excel Import -->
+            <Frame BackgroundColor="{StaticResource SurfaceDarkGray}" Padding="20" CornerRadius="12">
+                <VerticalStackLayout Spacing="10">
+                    <Label 
+                        Text="📥 엑셀 불러오기"
+                        Style="{StaticResource Heading3}"
+                        TextColor="{StaticResource TextWhite}" />
+                    <Label 
+                        Text="엑셀 파일에서 데이터를 가져옵니다."
+                        Style="{StaticResource Body2}"
+                        TextColor="{StaticResource TextLightGray}" />
+                    <Button 
+                        Text="엑셀에서 불러오기"
+                        BackgroundColor="{StaticResource AccentSecondary}"
+                        TextColor="{StaticResource TextWhite}"
+                        CornerRadius="8"
+                        Padding="15,10" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Backup Settings -->
+            <Frame BackgroundColor="{StaticResource SurfaceDarkGray}" Padding="20" CornerRadius="12">
+                <VerticalStackLayout Spacing="10">
+                    <Label 
+                        Text="🔄 백업 설정"
+                        Style="{StaticResource Heading3}"
+                        TextColor="{StaticResource TextWhite}" />
+                    <Label 
+                        Text="🚧 개발 중 - Week 4 Day 22-24에 구현 예정"
+                        Style="{StaticResource Body2}"
+                        TextColor="{StaticResource TextLightGray}" />
+                </VerticalStackLayout>
+            </Frame>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>
+

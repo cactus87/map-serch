@@ -3,9 +3,10 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:LmpLink.MAUI.ViewModels"
              xmlns:models="clr-namespace:LmpLink.MAUI.Models"
-             x:Class="LmpLink.MAUI.MainPage"
+             xmlns:pages="clr-namespace:LmpLink.MAUI.Views.Pages"
+             x:Class="LmpLink.MAUI.Views.Pages.MapPage"
              x:DataType="vm:MapViewModel"
-             Title="LMP-Link MVP"
+             Title="지도"
              BackgroundColor="{StaticResource BackgroundDeepNavy}">
 
     <Grid ColumnDefinitions="3*,7*">
@@ -136,7 +137,7 @@
                             HasShadow="True">
                             <Frame.GestureRecognizers>
                                 <TapGestureRecognizer 
-                                    Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MapViewModel}}, Path=SelectUserCommand}"
+                                    Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MapViewModel}}, Path=ShowPersonDetailCommand}"
                                     CommandParameter="{Binding}" />
                             </Frame.GestureRecognizers>
                             <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="Auto,*,Auto">
@@ -203,7 +204,7 @@
                             HasShadow="True">
                             <Frame.GestureRecognizers>
                                 <TapGestureRecognizer 
-                                    Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MapViewModel}}, Path=SelectAssistantCommand}"
+                                    Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MapViewModel}}, Path=ShowPersonDetailCommand}"
                                     CommandParameter="{Binding}" />
                             </Frame.GestureRecognizers>
                             <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="Auto,*,Auto">
@@ -298,6 +299,163 @@
                         Style="{StaticResource SmallText}" 
                         TextColor="#FB923C" />
                 </VerticalStackLayout>
+            </Frame>
+
+            <!-- Detail Panel (Slide-out from right) -->
+            <Frame 
+                IsVisible="{Binding IsDetailPanelVisible}"
+                HorizontalOptions="End"
+                VerticalOptions="Fill"
+                WidthRequest="350"
+                Padding="0"
+                BackgroundColor="{StaticResource SurfaceDarkGray}"
+                CornerRadius="12,0,0,12"
+                BorderColor="{StaticResource PrimaryCTA}"
+                HasShadow="True">
+                <Grid RowDefinitions="Auto,*,Auto" Padding="20">
+                    
+                    <!-- Header -->
+                    <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="0,0,0,15">
+                        <Label 
+                            Grid.Column="0"
+                            Text="상세 정보"
+                            Style="{StaticResource Heading2}"
+                            TextColor="{StaticResource PrimaryCTA}"
+                            VerticalOptions="Center" />
+                        <Button 
+                            Grid.Column="1"
+                            Text="✕"
+                            Command="{Binding CloseDetailPanelCommand}"
+                            BackgroundColor="Transparent"
+                            TextColor="{StaticResource TextLightGray}"
+                            FontSize="24"
+                            Padding="10,0"
+                            WidthRequest="40"
+                            HeightRequest="40" />
+                    </Grid>
+
+                    <!-- Content -->
+                    <ScrollView Grid.Row="1">
+                        <VerticalStackLayout Spacing="15" IsVisible="{Binding SelectedPerson, Converter={StaticResource IsNotNullConverter}}">
+                            
+                            <!-- Name -->
+                            <VerticalStackLayout Spacing="5">
+                                <Label 
+                                    Text="이름"
+                                    Style="{StaticResource Caption}"
+                                    TextColor="{StaticResource TextLightGray}" />
+                                <Label 
+                                    Text="{Binding SelectedPerson.Name}"
+                                    Style="{StaticResource Heading3}"
+                                    TextColor="{StaticResource TextWhite}" />
+                            </VerticalStackLayout>
+
+                            <!-- Type -->
+                            <VerticalStackLayout Spacing="5">
+                                <Label 
+                                    Text="유형"
+                                    Style="{StaticResource Caption}"
+                                    TextColor="{StaticResource TextLightGray}" />
+                                <Label 
+                                    Text="{Binding SelectedPerson.Type, Converter={StaticResource PersonTypeToKoreanConverter}}"
+                                    Style="{StaticResource Body1}"
+                                    TextColor="{StaticResource PrimaryCTA}" />
+                            </VerticalStackLayout>
+
+                            <!-- Address -->
+                            <VerticalStackLayout Spacing="5">
+                                <Label 
+                                    Text="주소"
+                                    Style="{StaticResource Caption}"
+                                    TextColor="{StaticResource TextLightGray}" />
+                                <Label 
+                                    Text="{Binding SelectedPerson.Address}"
+                                    Style="{StaticResource Body2}"
+                                    TextColor="{StaticResource TextWhite}" />
+                            </VerticalStackLayout>
+
+                            <!-- Email -->
+                            <VerticalStackLayout Spacing="5">
+                                <Label 
+                                    Text="이메일"
+                                    Style="{StaticResource Caption}"
+                                    TextColor="{StaticResource TextLightGray}" />
+                                <Label 
+                                    Text="{Binding SelectedPerson.Email}"
+                                    Style="{StaticResource Body2}"
+                                    TextColor="{StaticResource TextWhite}" />
+                            </VerticalStackLayout>
+
+                            <!-- Phone -->
+                            <VerticalStackLayout Spacing="5">
+                                <Label 
+                                    Text="전화번호"
+                                    Style="{StaticResource Caption}"
+                                    TextColor="{StaticResource TextLightGray}" />
+                                <Label 
+                                    Text="{Binding SelectedPerson.Phone}"
+                                    Style="{StaticResource Body2}"
+                                    TextColor="{StaticResource TextWhite}" />
+                            </VerticalStackLayout>
+
+                            <!-- Experience (for Assistants) -->
+                            <VerticalStackLayout Spacing="5" IsVisible="{Binding SelectedPerson.ExperienceYears, Converter={StaticResource IsNotNullConverter}}">
+                                <Label 
+                                    Text="경력"
+                                    Style="{StaticResource Caption}"
+                                    TextColor="{StaticResource TextLightGray}" />
+                                <Label 
+                                    Text="{Binding SelectedPerson.ExperienceYears, StringFormat='{0}년'}"
+                                    Style="{StaticResource Body2}"
+                                    TextColor="{StaticResource TextWhite}" />
+                            </VerticalStackLayout>
+
+                            <!-- Vehicle (for Assistants) -->
+                            <VerticalStackLayout Spacing="5" IsVisible="{Binding SelectedPerson.HasVehicle}">
+                                <Label 
+                                    Text="차량 보유"
+                                    Style="{StaticResource Caption}"
+                                    TextColor="{StaticResource TextLightGray}" />
+                                <Label 
+                                    Text="✓ 있음"
+                                    Style="{StaticResource Body2}"
+                                    TextColor="{StaticResource AccentSecondary}" />
+                            </VerticalStackLayout>
+
+                            <!-- Distance (if filtered) -->
+                            <VerticalStackLayout Spacing="5" IsVisible="{Binding SelectedPerson.Distance, Converter={StaticResource IsNotNullConverter}}">
+                                <Label 
+                                    Text="거리"
+                                    Style="{StaticResource Caption}"
+                                    TextColor="{StaticResource TextLightGray}" />
+                                <Label 
+                                    Text="{Binding SelectedPerson.Distance, StringFormat='{0:F2}km'}"
+                                    Style="{StaticResource Body2}"
+                                    TextColor="{StaticResource PrimaryCTA}" />
+                            </VerticalStackLayout>
+
+                        </VerticalStackLayout>
+                    </ScrollView>
+
+                    <!-- Footer Actions -->
+                    <VerticalStackLayout Grid.Row="2" Spacing="10" Margin="0,15,0,0">
+                        <Button 
+                            Text="상세 정보 편집"
+                            Command="{Binding EditPersonDetailsCommand}"
+                            BackgroundColor="{StaticResource PrimaryCTA}"
+                            TextColor="{StaticResource TextWhite}"
+                            CornerRadius="8"
+                            Padding="15,12" />
+                        <Button 
+                            Text="닫기"
+                            Command="{Binding CloseDetailPanelCommand}"
+                            BackgroundColor="{StaticResource SurfaceDarkNavy}"
+                            TextColor="{StaticResource TextLightGray}"
+                            CornerRadius="8"
+                            Padding="15,12" />
+                    </VerticalStackLayout>
+
+                </Grid>
             </Frame>
 
             <!-- Loading Overlay -->

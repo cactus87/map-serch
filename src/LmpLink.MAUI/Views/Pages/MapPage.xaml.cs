@@ -1,14 +1,14 @@
-namespace LmpLink.MAUI;
+namespace LmpLink.MAUI.Views.Pages;
 
-public partial class MainPage : ContentPage
+public partial class MapPage : ContentPage
 {
     private MapViewModel? _viewModel;
     private IMapService? _mapService;
     private bool _isMapReady;
 
-    public MainPage()
+    public MapPage()
     {
-        MauiProgram.Log("=== MainPage Constructor START ===");
+        MauiProgram.Log("=== MapPage Constructor START ===");
         try
         {
             MauiProgram.Log("[1] Calling InitializeComponent...");
@@ -44,7 +44,7 @@ public partial class MainPage : ContentPage
             MauiProgram.Log("[11] Subscribing to WebView events...");
             MapWebView.Navigated += OnWebViewNavigated;
             MapWebView.Navigating += OnWebViewNavigating;
-            MauiProgram.Log("=== MainPage Constructor SUCCESS ===");
+            MauiProgram.Log("=== MapPage Constructor SUCCESS ===");
         }
         catch (Exception ex)
         {
@@ -62,7 +62,7 @@ public partial class MainPage : ContentPage
     protected override async void OnAppearing()
     {
         base.OnAppearing();
-        MauiProgram.Log("=== MainPage.OnAppearing START ===");
+        MauiProgram.Log("=== MapPage.OnAppearing START ===");
 
         if (_viewModel == null)
         {
@@ -82,7 +82,7 @@ public partial class MainPage : ContentPage
             MauiProgram.Log($"[OnAppearing] Data already loaded: {_viewModel.Users.Count} users");
         }
         
-        MauiProgram.Log("=== MainPage.OnAppearing DONE ===");
+        MauiProgram.Log("=== MapPage.OnAppearing DONE ===");
     }
 
     private async void OnWebViewNavigated(object? sender, WebNavigatedEventArgs e)

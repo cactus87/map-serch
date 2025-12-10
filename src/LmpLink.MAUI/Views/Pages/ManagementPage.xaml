@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:LmpLink.MAUI.ViewModels"
+             xmlns:models="clr-namespace:LmpLink.MAUI.Models"
+             x:Class="LmpLink.MAUI.Views.Pages.ManagementPage"
+             x:DataType="vm:ManagementViewModel"
+             Title="관리"
+             BackgroundColor="{StaticResource BackgroundDeepNavy}">
+
+    <Grid RowDefinitions="Auto,Auto,*" Padding="20">
+        
+        <!-- Header -->
+        <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="0,0,0,15">
+            <Label 
+                Grid.Column="0"
+                Text="이용자/활동지원사 관리"
+                Style="{StaticResource Heading1}"
+                TextColor="{StaticResource PrimaryCTA}"
+                VerticalOptions="Center" />
+            
+            <Button 
+                Grid.Column="1"
+                Text="+ 신규 등록"
+                Command="{Binding CreatePersonCommand}"
+                BackgroundColor="{StaticResource PrimaryCTA}"
+                TextColor="{StaticResource TextWhite}"
+                Padding="20,10"
+                CornerRadius="8" />
+        </Grid>
+
+        <!-- Filter Bar -->
+        <Grid Grid.Row="1" ColumnDefinitions="Auto,Auto,*,Auto" ColumnSpacing="10" Margin="0,0,0,15">
+            
+            <!-- Type Filter: All -->
+            <Button 
+                Grid.Column="0"
+                Text="전체"
+                BackgroundColor="{StaticResource SurfaceDarkGray}"
+                TextColor="{StaticResource TextWhite}"
+                Padding="15,10"
+                CornerRadius="8">
+                <Button.Triggers>
+                    <DataTrigger TargetType="Button" Binding="{Binding SelectedTypeFilter}" Value="all">
+                        <Setter Property="BackgroundColor" Value="{StaticResource PrimaryCTA}" />
+                    </DataTrigger>
+                </Button.Triggers>
+            </Button>
+
+            <!-- Type Filter: User -->
+            <Button 
+                Grid.Column="1"
+                Text="이용자"
+                BackgroundColor="{StaticResource SurfaceDarkGray}"
+                TextColor="{StaticResource TextWhite}"
+                Padding="15,10"
+                CornerRadius="8">
+                <Button.Triggers>
+                    <DataTrigger TargetType="Button" Binding="{Binding SelectedTypeFilter}" Value="user">
+                        <Setter Property="BackgroundColor" Value="{StaticResource MarkerUser}" />
+                    </DataTrigger>
+                </Button.Triggers>
+            </Button>
+
+            <!-- Search Bar -->
+            <SearchBar 
+                Grid.Column="2"
+                Placeholder="이름 또는 주소로 검색..."
+                Text="{Binding SearchText}"
+                BackgroundColor="{StaticResource SurfaceDarkGray}"
+                TextColor="{StaticResource TextWhite}"
+                PlaceholderColor="{StaticResource TextLightGray}"
+                SearchCommand="{Binding ApplyFilterCommand}" />
+
+            <!-- Reload Button -->
+            <Button 
+                Grid.Column="3"
+                Text="🔄"
+                Command="{Binding LoadDataCommand}"
+                BackgroundColor="{StaticResource AccentSecondary}"
+                TextColor="{StaticResource TextWhite}"
+                Padding="15,10"
+                CornerRadius="8"
+                WidthRequest="50" />
+        </Grid>
+
+        <!-- Content: DataGrid -->
+        <Grid Grid.Row="2" BackgroundColor="{StaticResource SurfaceDarkGray}" Padding="15" RowDefinitions="Auto,*,Auto">
+            
+            <!-- Column Headers -->
+            <Grid Grid.Row="0" ColumnDefinitions="50,*,100,150,120,80,100" Padding="10" BackgroundColor="{StaticResource SurfaceDarkNavy}">
+                <Label Grid.Column="0" Text="ID" Style="{StaticResource Caption}" FontAttributes="Bold" TextColor="{StaticResource PrimaryCTA}" />
+                <Label Grid.Column="1" Text="이름" Style="{StaticResource Caption}" FontAttributes="Bold" TextColor="{StaticResource PrimaryCTA}" />
+                <Label Grid.Column="2" Text="유형" Style="{StaticResource Caption}" FontAttributes="Bold" TextColor="{StaticResource PrimaryCTA}" />
+                <Label Grid.Column="3" Text="주소" Style="{StaticResource Caption}" FontAttributes="Bold" TextColor="{StaticResource PrimaryCTA}" />
+                <Label Grid.Column="4" Text="전화번호" Style="{StaticResource Caption}" FontAttributes="Bold" TextColor="{StaticResource PrimaryCTA}" />
+                <Label Grid.Column="5" Text="경력" Style="{StaticResource Caption}" FontAttributes="Bold" TextColor="{StaticResource PrimaryCTA}" />
+                <Label Grid.Column="6" Text="액션" Style="{StaticResource Caption}" FontAttributes="Bold" TextColor="{StaticResource PrimaryCTA}" HorizontalTextAlignment="Center" />
+            </Grid>
+
+            <!-- Data Rows -->
+            <CollectionView Grid.Row="1" ItemsSource="{Binding FilteredPersons}" Margin="0,10,0,0">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="models:Person">
+                        <Frame Padding="10" Margin="0,2" CornerRadius="4" BorderColor="{StaticResource TextTertiary}" BackgroundColor="{StaticResource BackgroundDeepNavy}">
+                            <Frame.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:ManagementViewModel}}, Path=SelectPersonCommand}" CommandParameter="{Binding}" />
+                            </Frame.GestureRecognizers>
+                            <Grid ColumnDefinitions="50,*,100,150,120,80,100">
+                                <Label Grid.Column="0" Text="{Binding Id}" Style="{StaticResource Body2}" TextColor="{StaticResource TextLightGray}" />
+                                <Label Grid.Column="1" Text="{Binding Name}" Style="{StaticResource Body1}" TextColor="{StaticResource TextWhite}" FontAttributes="Bold" />
+                                <Label Grid.Column="2" Text="{Binding Type, Converter={StaticResource PersonTypeToKoreanConverter}}" Style="{StaticResource Body2}" TextColor="{StaticResource PrimaryCTA}" />
+                                <Label Grid.Column="3" Text="{Binding Address}" Style="{StaticResource Caption}" TextColor="{StaticResource TextLightGray}" LineBreakMode="TailTruncation" />
+                                <Label Grid.Column="4" Text="{Binding Phone}" Style="{StaticResource Caption}" TextColor="{StaticResource TextLightGray}" />
+                                <Label Grid.Column="5" Text="{Binding ExperienceYears, StringFormat='{0}년'}" Style="{StaticResource Caption}" TextColor="{StaticResource TextLightGray}" IsVisible="{Binding ExperienceYears, Converter={StaticResource IsNotNullConverter}}" />
+                                
+                                <HorizontalStackLayout Grid.Column="6" Spacing="5" HorizontalOptions="Center">
+                                    <Button 
+                                        Text="편집"
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:ManagementViewModel}}, Path=EditPersonCommand}"
+                                        BackgroundColor="{StaticResource AccentSecondary}"
+                                        TextColor="{StaticResource TextWhite}"
+                                        Padding="8,4"
+                                        CornerRadius="4"
+                                        FontSize="12" />
+                                    <Button 
+                                        Text="삭제"
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:ManagementViewModel}}, Path=DeletePersonCommand}"
+                                        BackgroundColor="#DC2626"
+                                        TextColor="{StaticResource TextWhite}"
+                                        Padding="8,4"
+                                        CornerRadius="4"
+                                        FontSize="12" />
+                                </HorizontalStackLayout>
+                            </Grid>
+                        </Frame>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+                <CollectionView.EmptyView>
+                    <Label 
+                        Text="데이터가 없습니다. '🔄' 버튼을 눌러 데이터를 로드하세요."
+                        Style="{StaticResource Body1}"
+                        TextColor="{StaticResource TextLightGray}"
+                        HorizontalOptions="Center"
+                        VerticalOptions="Center"
+                        Margin="20" />
+                </CollectionView.EmptyView>
+            </CollectionView>
+
+            <!-- Footer -->
+            <Grid Grid.Row="2" ColumnDefinitions="*,Auto" Margin="0,10,0,0">
+                <Label 
+                    Grid.Column="0"
+                    Text="{Binding FilteredPersons.Count, StringFormat='총 {0}명'}"
+                    Style="{StaticResource Body2}"
+                    TextColor="{StaticResource TextLightGray}"
+                    VerticalOptions="Center" />
+                
+                <HorizontalStackLayout Grid.Column="1" Spacing="10">
+                    <Label Text="&lt; 이전" Style="{StaticResource Body2}" TextColor="{StaticResource TextLightGray}" VerticalOptions="Center" />
+                    <Label Text="페이지 1/1" Style="{StaticResource Body2}" TextColor="{StaticResource PrimaryCTA}" VerticalOptions="Center" />
+                    <Label Text="다음 &gt;" Style="{StaticResource Body2}" TextColor="{StaticResource TextLightGray}" VerticalOptions="Center" />
+                </HorizontalStackLayout>
+            </Grid>
+
+        </Grid>
+
+    </Grid>
+
+</ContentPage>
+
+

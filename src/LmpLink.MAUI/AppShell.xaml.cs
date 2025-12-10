@@ -1,3 +1,5 @@
+using LmpLink.MAUI.Views.Pages;
+
 namespace LmpLink.MAUI;
 
 public partial class AppShell : Shell
@@ -11,7 +13,10 @@ public partial class AppShell : Shell
             MauiProgram.Log("[1] AppShell.InitializeComponent done");
             
             // Register routes for DI-based navigation
-            Routing.RegisterRoute(nameof(MainPage), typeof(MainPage));
+            Routing.RegisterRoute(nameof(MapPage), typeof(MapPage));
+            Routing.RegisterRoute(nameof(ManagementPage), typeof(ManagementPage));
+            Routing.RegisterRoute(nameof(DataPage), typeof(DataPage));
+            Routing.RegisterRoute(nameof(SettingsPage), typeof(SettingsPage));
             Routing.RegisterRoute(nameof(TestPage), typeof(TestPage));
             MauiProgram.Log("=== AppShell Constructor SUCCESS ===");
         }

@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="LmpLink.MAUI.Views.Pages.SettingsPage"
+             Title="설정"
+             BackgroundColor="{StaticResource BackgroundDeepNavy}">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="20">
+            
+            <!-- Title -->
+            <Label 
+                Text="⚙️ 설정"
+                Style="{StaticResource Heading1}"
+                TextColor="{StaticResource PrimaryCTA}" />
+
+            <!-- Appearance -->
+            <Frame BackgroundColor="{StaticResource SurfaceDarkGray}" Padding="20" CornerRadius="12">
+                <VerticalStackLayout Spacing="15">
+                    <Label 
+                        Text="🎨 외관"
+                        Style="{StaticResource Heading3}"
+                        TextColor="{StaticResource TextWhite}" />
+                    
+                    <Grid ColumnDefinitions="*,Auto">
+                        <Label 
+                            Grid.Column="0"
+                            Text="테마"
+                            Style="{StaticResource Body1}"
+                            TextColor="{StaticResource TextLightGray}"
+                            VerticalOptions="Center" />
+                        <Picker 
+                            Grid.Column="1"
+                            WidthRequest="150"
+                            BackgroundColor="{StaticResource SurfaceDarkNavy}"
+                            TextColor="{StaticResource TextWhite}">
+                            <Picker.Items>
+                                <x:String>다크 모드</x:String>
+                                <x:String>라이트 모드</x:String>
+                            </Picker.Items>
+                        </Picker>
+                    </Grid>
+
+                    <Grid ColumnDefinitions="*,Auto">
+                        <Label 
+                            Grid.Column="0"
+                            Text="UI 크기"
+                            Style="{StaticResource Body1}"
+                            TextColor="{StaticResource TextLightGray}"
+                            VerticalOptions="Center" />
+                        <Picker 
+                            Grid.Column="1"
+                            WidthRequest="150"
+                            BackgroundColor="{StaticResource SurfaceDarkNavy}"
+                            TextColor="{StaticResource TextWhite}">
+                            <Picker.Items>
+                                <x:String>작게</x:String>
+                                <x:String>보통</x:String>
+                                <x:String>크게</x:String>
+                            </Picker.Items>
+                        </Picker>
+                    </Grid>
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Map Colors -->
+            <Frame BackgroundColor="{StaticResource SurfaceDarkGray}" Padding="20" CornerRadius="12">
+                <VerticalStackLayout Spacing="15">
+                    <Label 
+                        Text="🗺️ 지도 색상"
+                        Style="{StaticResource Heading3}"
+                        TextColor="{StaticResource TextWhite}" />
+                    
+                    <Grid ColumnDefinitions="*,Auto">
+                        <Label 
+                            Grid.Column="0"
+                            Text="이용자 마커"
+                            Style="{StaticResource Body1}"
+                            TextColor="{StaticResource TextLightGray}"
+                            VerticalOptions="Center" />
+                        <BoxView 
+                            Grid.Column="1"
+                            Color="{StaticResource MarkerUser}"
+                            WidthRequest="40"
+                            HeightRequest="30"
+                            CornerRadius="4" />
+                    </Grid>
+
+                    <Grid ColumnDefinitions="*,Auto">
+                        <Label 
+                            Grid.Column="0"
+                            Text="활동지원사 마커"
+                            Style="{StaticResource Body1}"
+                            TextColor="{StaticResource TextLightGray}"
+                            VerticalOptions="Center" />
+                        <BoxView 
+                            Grid.Column="1"
+                            Color="{StaticResource MarkerAssistant}"
+                            WidthRequest="40"
+                            HeightRequest="30"
+                            CornerRadius="4" />
+                    </Grid>
+
+                    <Label 
+                        Text="🚧 색상 커스터마이징은 Week 4 Day 25-26에 구현 예정"
+                        Style="{StaticResource Caption}"
+                        TextColor="{StaticResource TextLightGray}"
+                        Margin="0,10,0,0" />
+                </VerticalStackLayout>
+            </Frame>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>
+
