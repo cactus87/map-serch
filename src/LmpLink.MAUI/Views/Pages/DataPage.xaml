@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:LmpLink.MAUI.ViewModels"
              x:Class="LmpLink.MAUI.Views.Pages.DataPage"
+             x:DataType="vm:DataViewModel"
              Title="데이터"
              BackgroundColor="{StaticResource BackgroundDeepNavy}">
 
@@ -27,10 +29,24 @@
                         TextColor="{StaticResource TextLightGray}" />
                     <Button 
                         Text="엑셀로 내보내기"
+                        Command="{Binding ExportToExcelCommand}"
                         BackgroundColor="{StaticResource AccentSecondary}"
                         TextColor="{StaticResource TextWhite}"
                         CornerRadius="8"
                         Padding="15,10" />
+                    
+                    <!-- Export Status -->
+                    <Label 
+                        Text="{Binding LastExportPath, StringFormat='마지막 내보내기: {0}'}"
+                        Style="{StaticResource Caption}"
+                        TextColor="{StaticResource TextLightGray}"
+                        IsVisible="{Binding LastExportPath, Converter={StaticResource IsNotNullConverter}}"
+                        Margin="0,10,0,0" />
+                    <Label 
+                        Text="{Binding ExportedCount, StringFormat='내보낸 데이터: {0}명'}"
+                        Style="{StaticResource Caption}"
+                        TextColor="{StaticResource PrimaryCTA}"
+                        IsVisible="{Binding ExportedCount, Converter={StaticResource IsNotNullConverter}}" />
                 </VerticalStackLayout>
             </Frame>
 
@@ -47,10 +63,24 @@
                         TextColor="{StaticResource TextLightGray}" />
                     <Button 
                         Text="엑셀에서 불러오기"
+                        Command="{Binding ImportFromExcelCommand}"
                         BackgroundColor="{StaticResource AccentSecondary}"
                         TextColor="{StaticResource TextWhite}"
                         CornerRadius="8"
                         Padding="15,10" />
+                    
+                    <!-- Import Status -->
+                    <Label 
+                        Text="{Binding LastImportPath, StringFormat='마지막 불러오기: {0}'}"
+                        Style="{StaticResource Caption}"
+                        TextColor="{StaticResource TextLightGray}"
+                        IsVisible="{Binding LastImportPath, Converter={StaticResource IsNotNullConverter}}"
+                        Margin="0,10,0,0" />
+                    <Label 
+                        Text="{Binding ImportedCount, StringFormat='불러온 데이터: {0}명'}"
+                        Style="{StaticResource Caption}"
+                        TextColor="{StaticResource PrimaryCTA}"
+                        IsVisible="{Binding ImportedCount, Converter={StaticResource IsNotNullConverter}}" />
                 </VerticalStackLayout>
             </Frame>
 
@@ -62,11 +92,42 @@
                         Style="{StaticResource Heading3}"
                         TextColor="{StaticResource TextWhite}" />
                     <Label 
-                        Text="🚧 개발 중 - Week 4 Day 22-24에 구현 예정"
+                        Text="🚧 개발 중 - 자동 백업 기능은 추후 구현 예정입니다."
                         Style="{StaticResource Body2}"
                         TextColor="{StaticResource TextLightGray}" />
                 </VerticalStackLayout>
             </Frame>
+
+            <!-- Current Data Save -->
+            <Frame BackgroundColor="{StaticResource SurfaceDarkGray}" Padding="20" CornerRadius="12">
+                <VerticalStackLayout Spacing="10">
+                    <Label 
+                        Text="💾 현재 데이터 저장"
+                        Style="{StaticResource Heading3}"
+                        TextColor="{StaticResource TextWhite}" />
+                    <Label 
+                        Text="현재 데이터를 Supabase에 저장합니다."
+                        Style="{StaticResource Body2}"
+                        TextColor="{StaticResource TextLightGray}" />
+                    <Button 
+                        Text="현재 데이터 저장"
+                        Command="{Binding SaveCurrentDataCommand}"
+                        BackgroundColor="{StaticResource PrimaryCTA}"
+                        TextColor="{StaticResource TextWhite}"
+                        CornerRadius="8"
+                        Padding="15,10" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Loading Indicator -->
+            <ActivityIndicator
+                IsRunning="{Binding IsLoading}"
+                IsVisible="{Binding IsLoading}"
+                Color="{StaticResource PrimaryCTA}"
+                WidthRequest="40"
+                HeightRequest="40"
+                HorizontalOptions="Center"
+                Margin="20" />
 
         </VerticalStackLayout>
     </ScrollView>
