@@ -29,3 +29,4 @@ public class CenterModeToColorConverter : IValueConverter
         throw new NotImplementedException();
     }
 }
+

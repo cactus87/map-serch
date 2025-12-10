@@ -230,7 +230,16 @@ public class MapService : IMapService
                 throw new InvalidOperationException("Empty response from getVisibleMarkerCount");
             }
 
-            var json = JsonSerializer.Deserialize<MarkerCountResult>(result);
+            // WebView returns escaped JSON string, need to unescape
+            var unescaped = System.Text.RegularExpressions.Regex.Unescape(result);
+            
+            // Remove surrounding quotes if present
+            if (unescaped.StartsWith("\"") && unescaped.EndsWith("\""))
+            {
+                unescaped = unescaped.Substring(1, unescaped.Length - 2);
+            }
+
+            var json = JsonSerializer.Deserialize<MarkerCountResult>(unescaped);
             if (json == null)
             {
                 throw new InvalidOperationException("Failed to parse getVisibleMarkerCount response");

@@ -29,3 +29,4 @@ public class CenterModeToKoreanConverter : IValueConverter
         throw new NotImplementedException();
     }
 }
+
