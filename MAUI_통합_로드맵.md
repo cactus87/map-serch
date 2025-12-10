@@ -228,14 +228,14 @@
 
 ## 🗓️ Week 4: 데이터 & 설정 (Day 22-28) 🔲 예정
 
-### Day 22-24: 탭3 - 데이터 관리
-**목표**: 엑셀 import/export, 백업/복원
+### Day 22-23: 탭3 - 데이터 관리 (엑셀 Import/Export)
+**목표**: 엑셀 import/export로 대량 데이터 입력
 
 **작업 계획**:
 - [ ] ViewModels/DataViewModel.cs
 - [ ] Views/Pages/DataPage.xaml
 - [ ] **엑셀 내보내기 (Export)**:
-  - [ ] ClosedXML 또는 EPPlus NuGet 설치
+  - [ ] ClosedXML NuGet 설치
   - [ ] ExportToExcelAsync() 구현
   - [ ] 파일 저장 다이얼로그
 - [ ] **엑셀 불러오기 (Import)**:
@@ -243,7 +243,77 @@
   - [ ] 파일 선택 다이얼로그
   - [ ] 데이터 검증 + 미리보기
   - [ ] Supabase 동기화
-- [ ] **자동 백업**:
+
+### Day 24: 주소 → 좌표 자동 변환 (Geocoding) ⭐ 핵심 기능
+**목표**: 사용자가 주소만 입력하면 좌표 자동 생성
+
+**작업 계획**:
+- [ ] Services/IGeocodingService.cs 인터페이스 생성
+- [ ] Services/Implementation/NaverGeocodingService.cs 구현
+  - [ ] Naver Geocoding API 연동 (https://api.naver.com/v1/map/geocode)
+  - [ ] `GetCoordinatesFromAddressAsync(string address)` 메서드
+  - [ ] 에러 처리 (주소 찾기 실패 시)
+- [ ] PersonEditViewModel에 Geocoding 통합
+  - [ ] "📍 주소로 좌표 찾기" 버튼
+  - [ ] 주소 입력 → API 호출 → 위도/경도 자동 입력
+  - [ ] **지도에 임시 마커 표시** (미리보기)
+  - [ ] 사용자 확인/수정 플로우:
+    - ✅ "위치가 맞습니다" → 좌표 확정
+    - 🔧 "위치 수정" → 지도에서 직접 클릭
+- [ ] PersonEditPage XAML 업데이트
+  - [ ] 주소 입력란 하단에 "좌표 찾기" 버튼
+  - [ ] 지도 미리보기 섹션 (선택적)
+  - [ ] 좌표 입력란을 읽기 전용으로 변경 (자동 입력)
+- [ ] MauiProgram.cs에 IGeocodingService DI 등록
+
+**Geocoding UX Flow**:
+```
+1. 사용자가 주소 입력: "서울특별시 강남구 테헤란로 123"
+2. [📍 좌표 찾기] 버튼 클릭
+3. Naver API 호출
+4. 지도에 임시 마커 표시 (37.5665, 126.9780)
+5. 확인 다이얼로그:
+   ┌────────────────────────────────┐
+   │ 📍 위치 확인                   │
+   ├────────────────────────────────┤
+   │ 주소: 서울특별시 강남구 테헤란로 123  │
+   │ 좌표: 37.5665, 126.9780        │
+   │                                │
+   │ [✅ 위치가 맞습니다]  [🔧 수정]│
+   └────────────────────────────────┘
+6a. ✅ 클릭 → 좌표 확정 → 저장
+6b. 🔧 클릭 → 지도 페이지 이동 → 사용자가 직접 클릭
+```
+
+**Naver Geocoding API 설정**:
+- User Secrets에 API Key 저장 (기존 Client ID 재사용 가능)
+- 요청 예시:
+  ```
+  GET https://naveropenapi.apigw.ntruss.com/map-geocode/v2/geocode
+  ?query=서울특별시 강남구 테헤란로 123
+  Headers:
+    X-NCP-APIGW-API-KEY-ID: {Client ID}
+    X-NCP-APIGW-API-KEY: {Client Secret}
+  ```
+- 응답 예시:
+  ```json
+  {
+    "addresses": [
+      {
+        "roadAddress": "서울특별시 강남구 테헤란로 123",
+        "jibunAddress": "서울특별시 강남구 역삼동 123-45",
+        "x": "126.9780",  // 경도
+        "y": "37.5665"    // 위도
+      }
+    ]
+  }
+  ```
+
+### Day 25-26: 백업/복원 & 데이터 동기화 (선택적)
+**목표**: 데이터 안전성 확보
+
+**작업 계획**:
+- [ ] **자동 백업** (선택적):
   - [ ] 백업 주기 설정 (매일/매주/수동)
   - [ ] Supabase Edge Function 또는 로컬 저장
   - [ ] 백업 목록 표시 (날짜, 크기)
@@ -295,8 +365,8 @@
 
 ---
 
-### Day 25-28: 탭4 - 설정
-**목표**: UI 커스터마이징, 테마 설정
+### Day 27-28: 탭4 - 설정 & 최종 테스트
+**목표**: UI 커스터마이징, 전체 기능 테스트
 
 **작업 계획**:
 - [ ] ViewModels/SettingsViewModel.cs
@@ -319,6 +389,10 @@
 - [ ] **설정 저장**:
   - [ ] Preferences (MAUI) 사용
   - [ ] 앱 시작 시 설정 로드
+- [ ] **최종 테스트**:
+  - [ ] End-to-End 시나리오 테스트
+  - [ ] 성능 측정 (앱 시작 <2초, 지도 로드 <3초, 필터 <500ms)
+  - [ ] 에러 로그 확인
 
 **설정 UI**:
 ```

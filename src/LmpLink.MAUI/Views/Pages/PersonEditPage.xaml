@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:LmpLink.MAUI.ViewModels"
+             x:Class="LmpLink.MAUI.Views.Pages.PersonEditPage"
+             x:DataType="vm:PersonEditViewModel"
+             Title="{Binding PageTitle}"
+             BackgroundColor="{StaticResource BackgroundDeepNavy}">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="20">
+            
+            <!-- Header -->
+            <Label 
+                Text="{Binding PageTitle}"
+                Style="{StaticResource Heading1}"
+                TextColor="{StaticResource PrimaryCTA}" />
+
+            <!-- Form Fields -->
+            <Frame BackgroundColor="{StaticResource SurfaceDarkGray}" Padding="20" CornerRadius="12">
+                <VerticalStackLayout Spacing="15">
+                    
+                    <!-- Person Type -->
+                    <VerticalStackLayout Spacing="8">
+                        <Label 
+                            Text="유형 *"
+                            Style="{StaticResource Body1}"
+                            TextColor="{StaticResource TextLightGray}" />
+                        <HorizontalStackLayout Spacing="10">
+                            <Button 
+                                Text="이용자"
+                                Command="{Binding SelectTypeCommand}"
+                                CommandParameter="User"
+                                BackgroundColor="{StaticResource SurfaceDarkNavy}"
+                                TextColor="{StaticResource TextWhite}"
+                                Padding="20,10"
+                                CornerRadius="8">
+                                <Button.Triggers>
+                                    <DataTrigger TargetType="Button" Binding="{Binding SelectedType}" Value="User">
+                                        <Setter Property="BackgroundColor" Value="{StaticResource MarkerUser}" />
+                                    </DataTrigger>
+                                </Button.Triggers>
+                            </Button>
+                            <Button 
+                                Text="활동지원사"
+                                Command="{Binding SelectTypeCommand}"
+                                CommandParameter="Assistant"
+                                BackgroundColor="{StaticResource SurfaceDarkNavy}"
+                                TextColor="{StaticResource TextWhite}"
+                                Padding="20,10"
+                                CornerRadius="8">
+                                <Button.Triggers>
+                                    <DataTrigger TargetType="Button" Binding="{Binding SelectedType}" Value="Assistant">
+                                        <Setter Property="BackgroundColor" Value="{StaticResource MarkerAssistant}" />
+                                    </DataTrigger>
+                                </Button.Triggers>
+                            </Button>
+                        </HorizontalStackLayout>
+                    </VerticalStackLayout>
+
+                    <!-- Name -->
+                    <VerticalStackLayout Spacing="8">
+                        <Label 
+                            Text="이름 *"
+                            Style="{StaticResource Body1}"
+                            TextColor="{StaticResource TextLightGray}" />
+                        <Entry 
+                            Text="{Binding Name}"
+                            Placeholder="홍길동"
+                            BackgroundColor="{StaticResource SurfaceDarkNavy}"
+                            TextColor="{StaticResource TextWhite}"
+                            PlaceholderColor="{StaticResource TextTertiary}" />
+                    </VerticalStackLayout>
+
+                    <!-- Phone -->
+                    <VerticalStackLayout Spacing="8">
+                        <Label 
+                            Text="전화번호"
+                            Style="{StaticResource Body1}"
+                            TextColor="{StaticResource TextLightGray}" />
+                        <Entry 
+                            Text="{Binding Phone}"
+                            Placeholder="010-1234-5678"
+                            Keyboard="Telephone"
+                            BackgroundColor="{StaticResource SurfaceDarkNavy}"
+                            TextColor="{StaticResource TextWhite}"
+                            PlaceholderColor="{StaticResource TextTertiary}" />
+                    </VerticalStackLayout>
+
+                    <!-- Address -->
+                    <VerticalStackLayout Spacing="8">
+                        <Label 
+                            Text="주소 *"
+                            Style="{StaticResource Body1}"
+                            TextColor="{StaticResource TextLightGray}" />
+                        <Entry 
+                            Text="{Binding Address}"
+                            Placeholder="서울특별시 강남구 테헤란로 123"
+                            BackgroundColor="{StaticResource SurfaceDarkNavy}"
+                            TextColor="{StaticResource TextWhite}"
+                            PlaceholderColor="{StaticResource TextTertiary}" />
+                        <Button 
+                            Text="📍 주소 검색"
+                            Command="{Binding SearchAddressCommand}"
+                            BackgroundColor="{StaticResource AccentSecondary}"
+                            TextColor="{StaticResource TextWhite}"
+                            Padding="15,10"
+                            CornerRadius="8" />
+                    </VerticalStackLayout>
+
+                    <!-- Latitude -->
+                    <VerticalStackLayout Spacing="8">
+                        <Label 
+                            Text="위도 *"
+                            Style="{StaticResource Body1}"
+                            TextColor="{StaticResource TextLightGray}" />
+                        <Entry 
+                            Text="{Binding Latitude}"
+                            Placeholder="37.5665"
+                            Keyboard="Numeric"
+                            BackgroundColor="{StaticResource SurfaceDarkNavy}"
+                            TextColor="{StaticResource TextWhite}"
+                            PlaceholderColor="{StaticResource TextTertiary}" />
+                    </VerticalStackLayout>
+
+                    <!-- Longitude -->
+                    <VerticalStackLayout Spacing="8">
+                        <Label 
+                            Text="경도 *"
+                            Style="{StaticResource Body1}"
+                            TextColor="{StaticResource TextLightGray}" />
+                        <Entry 
+                            Text="{Binding Longitude}"
+                            Placeholder="126.9780"
+                            Keyboard="Numeric"
+                            BackgroundColor="{StaticResource SurfaceDarkNavy}"
+                            TextColor="{StaticResource TextWhite}"
+                            PlaceholderColor="{StaticResource TextTertiary}" />
+                    </VerticalStackLayout>
+
+                    <!-- Gender -->
+                    <VerticalStackLayout Spacing="8">
+                        <Label 
+                            Text="성별"
+                            Style="{StaticResource Body1}"
+                            TextColor="{StaticResource TextLightGray}" />
+                        <HorizontalStackLayout Spacing="10">
+                            <Button 
+                                Text="남성"
+                                Command="{Binding SelectGenderCommand}"
+                                CommandParameter="male"
+                                BackgroundColor="{StaticResource SurfaceDarkNavy}"
+                                TextColor="{StaticResource TextWhite}"
+                                Padding="20,10"
+                                CornerRadius="8">
+                                <Button.Triggers>
+                                    <DataTrigger TargetType="Button" Binding="{Binding Gender}" Value="male">
+                                        <Setter Property="BackgroundColor" Value="{StaticResource PrimaryCTA}" />
+                                    </DataTrigger>
+                                </Button.Triggers>
+                            </Button>
+                            <Button 
+                                Text="여성"
+                                Command="{Binding SelectGenderCommand}"
+                                CommandParameter="female"
+                                BackgroundColor="{StaticResource SurfaceDarkNavy}"
+                                TextColor="{StaticResource TextWhite}"
+                                Padding="20,10"
+                                CornerRadius="8">
+                                <Button.Triggers>
+                                    <DataTrigger TargetType="Button" Binding="{Binding Gender}" Value="female">
+                                        <Setter Property="BackgroundColor" Value="{StaticResource PrimaryCTA}" />
+                                    </DataTrigger>
+                                </Button.Triggers>
+                            </Button>
+                        </HorizontalStackLayout>
+                    </VerticalStackLayout>
+
+                    <!-- Has Vehicle (Assistant only) -->
+                    <VerticalStackLayout Spacing="8" IsVisible="{Binding IsAssistant}">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Label 
+                                Grid.Column="0"
+                                Text="차량 보유"
+                                Style="{StaticResource Body1}"
+                                TextColor="{StaticResource TextLightGray}"
+                                VerticalOptions="Center" />
+                            <Switch 
+                                Grid.Column="1"
+                                IsToggled="{Binding HasVehicle}"
+                                OnColor="{StaticResource AccentSecondary}"
+                                ThumbColor="{StaticResource TextWhite}" />
+                        </Grid>
+                    </VerticalStackLayout>
+
+                    <!-- Experience (Assistant only) -->
+                    <VerticalStackLayout Spacing="8" IsVisible="{Binding IsAssistant}">
+                        <Label 
+                            Text="경력 (년)"
+                            Style="{StaticResource Body1}"
+                            TextColor="{StaticResource TextLightGray}" />
+                        <Entry 
+                            Text="{Binding Experience}"
+                            Placeholder="5"
+                            Keyboard="Numeric"
+                            BackgroundColor="{StaticResource SurfaceDarkNavy}"
+                            TextColor="{StaticResource TextWhite}"
+                            PlaceholderColor="{StaticResource TextTertiary}" />
+                    </VerticalStackLayout>
+
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Action Buttons -->
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="15">
+                <Button 
+                    Grid.Column="0"
+                    Text="취소"
+                    Command="{Binding CancelCommand}"
+                    BackgroundColor="{StaticResource SurfaceDarkNavy}"
+                    TextColor="{StaticResource TextLightGray}"
+                    BorderColor="{StaticResource TextTertiary}"
+                    BorderWidth="1"
+                    CornerRadius="8"
+                    Padding="20,15"
+                    FontSize="16" />
+                <Button 
+                    Grid.Column="1"
+                    Text="{Binding SaveButtonText}"
+                    Command="{Binding SaveCommand}"
+                    BackgroundColor="{StaticResource PrimaryCTA}"
+                    TextColor="{StaticResource TextWhite}"
+                    CornerRadius="8"
+                    Padding="20,15"
+                    FontSize="16"
+                    FontAttributes="Bold" />
+            </Grid>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>
+

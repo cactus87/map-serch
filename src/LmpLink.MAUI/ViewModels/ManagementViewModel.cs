@@ -152,9 +152,8 @@ public partial class ManagementViewModel : BaseViewModel
     [RelayCommand]
     private async Task CreatePersonAsync()
     {
-        MauiProgram.Log("[ManagementViewModel] CreatePersonAsync - TODO: Navigate to create page");
-        // TODO: Navigate to create/edit page with null person (new entry)
-        await Shell.Current.DisplayAlertAsync("알림", "신규 등록 기능은 Week 3 Day 21에 구현 예정입니다.", "확인");
+        MauiProgram.Log("[ManagementViewModel] CreatePersonAsync - Navigating to PersonEditPage");
+        await Shell.Current.GoToAsync("PersonEditPage");
     }
 
     /// <summary>
@@ -170,8 +169,9 @@ public partial class ManagementViewModel : BaseViewModel
         }
 
         MauiProgram.Log($"[ManagementViewModel] EditPersonAsync: {SelectedPerson.Name}");
-        // TODO: Navigate to edit page with SelectedPerson
-        await Shell.Current.DisplayAlertAsync("알림", "편집 기능은 Week 3 Day 21에 구현 예정입니다.", "확인");
+        
+        // Navigate with query parameter
+        await Shell.Current.GoToAsync($"PersonEditPage?PersonId={SelectedPerson.Id}");
     }
 
     /// <summary>

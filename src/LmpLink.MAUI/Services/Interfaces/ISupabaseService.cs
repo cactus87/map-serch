@@ -31,7 +31,17 @@ public interface ISupabaseService
     Task<Person?> GetPersonByIdAsync(int id);
 
     /// <summary>
-    /// Create or update a person
+    /// Create a new person
+    /// </summary>
+    Task<Person> CreatePersonAsync(Person person);
+
+    /// <summary>
+    /// Update an existing person
+    /// </summary>
+    Task<Person> UpdatePersonAsync(Person person);
+
+    /// <summary>
+    /// Create or update a person (legacy method)
     /// </summary>
     Task<Person?> UpsertPersonAsync(Person person);
 
@@ -40,6 +50,7 @@ public interface ISupabaseService
     /// </summary>
     Task<bool> DeletePersonAsync(int id);
 }
+
 
 
 

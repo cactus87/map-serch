@@ -60,6 +60,7 @@ public static class MauiProgram
             builder.Services.AddTransient<ManagementViewModel>();
             builder.Services.AddTransient<DataViewModel>();
             builder.Services.AddTransient<SettingsViewModel>();
+            builder.Services.AddTransient<PersonEditViewModel>();
             Log("[4] ViewModels registered");
 
             // Register Pages
@@ -67,6 +68,7 @@ public static class MauiProgram
             builder.Services.AddTransient<Views.Pages.ManagementPage>();
             builder.Services.AddTransient<Views.Pages.DataPage>();
             builder.Services.AddTransient<Views.Pages.SettingsPage>();
+            builder.Services.AddTransient<Views.Pages.PersonEditPage>();
             builder.Services.AddTransient<TestPage>();
             Log("[5] Pages registered");
 

@@ -160,6 +160,69 @@ public class SupabaseService : ISupabaseService
         }
     }
 
+    public async Task<Person> CreatePersonAsync(Person person)
+    {
+        if (_client == null)
+        {
+            await InitializeAsync();
+        }
+
+        try
+        {
+            MauiProgram.Log($"[SupabaseService] Creating person: {person.Name}");
+
+            var dto = MapToDto(person);
+            dto.Id = 0; // Ensure ID is 0 for new records
+            
+            var response = await _client!.From<PersonDto>().Insert(dto);
+
+            if (response?.Models?.FirstOrDefault() == null)
+            {
+                throw new InvalidOperationException("Failed to create person: No response from server");
+            }
+
+            var createdPerson = MapToPerson(response.Models.First());
+            MauiProgram.Log($"[SupabaseService] Created person ID {createdPerson.Id}");
+            return createdPerson;
+        }
+        catch (Exception ex)
+        {
+            MauiProgram.Log($"[SupabaseService] CreatePersonAsync failed: {ex.Message}");
+            throw;
+        }
+    }
+
+    public async Task<Person> UpdatePersonAsync(Person person)
+    {
+        if (_client == null)
+        {
+            await InitializeAsync();
+        }
+
+        try
+        {
+            MauiProgram.Log($"[SupabaseService] Updating person ID {person.Id}: {person.Name}");
+
+            var dto = MapToDto(person);
+            
+            var response = await _client!.From<PersonDto>().Update(dto);
+
+            if (response?.Models?.FirstOrDefault() == null)
+            {
+                throw new InvalidOperationException("Failed to update person: No response from server");
+            }
+
+            var updatedPerson = MapToPerson(response.Models.First());
+            MauiProgram.Log($"[SupabaseService] Updated person ID {updatedPerson.Id}");
+            return updatedPerson;
+        }
+        catch (Exception ex)
+        {
+            MauiProgram.Log($"[SupabaseService] UpdatePersonAsync failed: {ex.Message}");
+            throw;
+        }
+    }
+
     public async Task<Person?> UpsertPersonAsync(Person person)
     {
         if (_client == null)
@@ -244,6 +307,7 @@ public class SupabaseService : ISupabaseService
             Id = person.Id,
             Name = person.Name,
             Type = person.Type.ToString().ToLower(),
+            Email = $"noemail_{person.Id}@placeholder.local", // Fix: Set placeholder email to satisfy NOT NULL constraint
             Latitude = person.Latitude,
             Longitude = person.Longitude,
             Address = person.Address,
