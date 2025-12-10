@@ -1,4 +1,6 @@
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Configuration;
+using System.Reflection;
 
 namespace LmpLink.MAUI;
 
@@ -28,6 +30,11 @@ public static class MauiProgram
             var builder = MauiApp.CreateBuilder();
             Log("[1] MauiAppBuilder created");
             
+            // Add User Secrets configuration
+            var assembly = Assembly.GetExecutingAssembly();
+            builder.Configuration.AddUserSecrets(assembly);
+            Log("[1.5] User Secrets configured");
+            
             builder
                 .UseMauiApp<App>()
                 .ConfigureFonts(fonts =>
@@ -45,6 +52,7 @@ public static class MauiProgram
             builder.Services.AddSingleton<IMockDataService, MockDataService>();
             builder.Services.AddSingleton<ILocationService, LocationService>();
             builder.Services.AddSingleton<IMapService, MapService>();
+            builder.Services.AddSingleton<ISupabaseService, SupabaseService>();
             Log("[3] Services registered");
 
             // Register ViewModels

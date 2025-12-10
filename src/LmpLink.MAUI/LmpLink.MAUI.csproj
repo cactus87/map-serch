@@ -49,7 +49,9 @@
     <PackageReference Include="Microsoft.Maui.Controls" Version="10.0.0" />
     <PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="10.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="9.0.0" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
+    <PackageReference Include="supabase-csharp" Version="0.16.2" />
   </ItemGroup>
 
 </Project>

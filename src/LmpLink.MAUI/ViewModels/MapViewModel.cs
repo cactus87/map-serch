@@ -28,6 +28,7 @@ public partial class MapViewModel : BaseViewModel
 {
     private readonly IMockDataService _mockDataService;
     private readonly ILocationService _locationService;
+    private readonly ISupabaseService _supabaseService;
 
     // --- Observable Properties ---
 
@@ -90,24 +91,53 @@ public partial class MapViewModel : BaseViewModel
     /// <summary>
     /// Constructor with DI.
     /// </summary>
-    public MapViewModel(IMockDataService mockDataService, ILocationService locationService)
+    public MapViewModel(
+        IMockDataService mockDataService, 
+        ILocationService locationService,
+        ISupabaseService supabaseService)
     {
         _mockDataService = mockDataService;
         _locationService = locationService;
+        _supabaseService = supabaseService;
     }
 
     // --- Commands ---
 
     /// <summary>
-    /// Load users and assistants from MockDataService.
+    /// Load users and assistants from Supabase (with Mock fallback).
     /// </summary>
     [RelayCommand]
     private async Task LoadDataAsync()
     {
         await ExecuteAsync(async () =>
         {
-            var users = await _mockDataService.GetUsersAsync();
-            var assistants = await _mockDataService.GetAssistantsAsync();
+            MauiProgram.Log("[MapViewModel] LoadDataAsync START");
+            
+            List<Person> users;
+            List<Person> assistants;
+
+            try
+            {
+                // Try loading from Supabase
+                MauiProgram.Log("[MapViewModel] Attempting Supabase connection...");
+                await _supabaseService.InitializeAsync();
+                
+                users = await _supabaseService.GetUsersAsync();
+                assistants = await _supabaseService.GetAssistantsAsync();
+                
+                MauiProgram.Log($"[MapViewModel] Supabase SUCCESS: {users.Count} users, {assistants.Count} assistants");
+            }
+            catch (Exception ex)
+            {
+                // Fallback to Mock data
+                MauiProgram.Log($"[MapViewModel] Supabase FAILED: {ex.Message}");
+                MauiProgram.Log("[MapViewModel] Falling back to Mock data...");
+                
+                users = await _mockDataService.GetUsersAsync();
+                assistants = await _mockDataService.GetAssistantsAsync();
+                
+                MauiProgram.Log($"[MapViewModel] Mock data loaded: {users.Count} users, {assistants.Count} assistants");
+            }
 
             Users = new ObservableCollection<Person>(users);
             Assistants = new ObservableCollection<Person>(assistants);
@@ -119,6 +149,8 @@ public partial class MapViewModel : BaseViewModel
             AssistantsInRadius = assistants.Count;
 
             UpdateFilterStatusText();
+            
+            MauiProgram.Log("[MapViewModel] LoadDataAsync END");
         });
     }
 

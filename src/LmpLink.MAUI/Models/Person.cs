@@ -27,7 +27,7 @@ public enum PersonType
 /// <param name="Gender">Gender: "male", "female", or null</param>
 /// <param name="HasVehicle">Whether the person has a vehicle</param>
 /// <param name="AvailableTimeSlots">Available time slots (e.g., "weekday_am", "weekend")</param>
-/// <param name="Experience">Experience description (for assistants)</param>
+/// <param name="Experience">Experience years (for assistants)</param>
 public record Person(
     int Id,
     string Name,
@@ -39,7 +39,7 @@ public record Person(
     string? Gender = null,
     bool HasVehicle = false,
     string? AvailableTimeSlots = null,
-    string? Experience = null
+    int? Experience = null
 )
 {
     /// <summary>

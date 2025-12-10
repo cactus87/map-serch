@@ -1,308 +1,418 @@
 # MAUI 통합 로드맵 (Week-by-Week)
 
 **프로젝트**: LMP-Link MVP  
-**기술 스택**: .NET MAUI 9.0 + C# 13 + CommunityToolkit.Mvvm  
-**기간**: 4주 (28일)  
-**문서 버전**: 1.0  
+**기술 스택**: .NET MAUI 10.0 + C# 13 + CommunityToolkit.Mvvm + Supabase  
+**기간**: 4주 (28일) + 추가 2주 (확장 기능)  
+**문서 버전**: 2.0  
 **작성일**: 2025-12-10  
+**최종 업데이트**: 2025-12-11
 
 ---
 
 ## 📊 전체 개요
 
-### 목표
-- **Week 1**: 기초 설정 + 데이터 모델 + ViewModel + UI 레이아웃
-- **Week 2**: 네이버 지도 연동 + JS Interop + 마커 렌더링
-- **Week 3**: Supabase 연동 + 인증 + CRUD
-- **Week 4**: AI 추천 + 테스트 + 배포
+### 앱 구조 (탭 기반 네비게이션)
 
-### 진행률 (현재)
-- ✅ Week 1: 100% 완료 (Day 1-7)
-- ✅ Week 2: 43% 완료 (Day 8-10)
-- ⏳ Week 2: 57% 진행 중 (Day 11-14)
+```
+┌─────────────────────────────────────────────────────────────┐
+│  🏠 LMP-Link                              [☰ 메인 메뉴]     │
+├─────────────────────────────────────────────────────────────┤
+│  [탭1-지도] [탭2-관리] [탭3-데이터] [탭4-설정]              │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│   ┌─────────────┐  ┌──────────────────────────────────┐    │
+│   │ 🔍 검색바   │  │                                  │    │
+│   │ [이름/주소] │  │                                  │    │
+│   │ [상세검색▼]│  │                                  │    │
+│   │  ─────────  │  │                                  │    │
+│   │  이용자 목록│  │         네이버 지도              │    │
+│   │  김영희     │  │                                  │    │
+│   │  이철수     │  │    📍 마커 클릭 시               │    │
+│   │  박지영     │  │    → 오른쪽 슬라이드 패널        │    │
+│   │  ...       │  │                                  │    │
+│   │            │  │                                  │    │
+│   │  반경 필터  │  │                                  │    │
+│   │ [1km][3km] │  │                                  │    │
+│   │ [5km][전체]│  │                                  │    │
+│   └─────────────┘  └──────────────────────────────────┘    │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### 검색바 기능 (상세 검색)
+
+**이용자(수급자) 검색 필터:**
+- 이름, 주소
+- 연령 (범위)
+- 성별
+- 장애 유형 (지체, 뇌병변, 시각, 청각 등)
+- 장애 상태 (최중증/중증/경증)
+- 인공호흡기 사용 유무
+- 휠체어/보행 가능 여부 (이동능력)
+- 서비스 잔여시간
+
+**활동지원사 검색 필터:**
+- 이름, 주소
+- 연령 (범위)
+- 성별
+- 경력 (년수)
+- 차량 보유 여부
+- 희망 근무시간 (평일오전/오후/야간/주말)
+- 가능 업무 (신체활동, 가사, 이동지원, 정서지원)
+- 야간/주말 가능 여부
+
+### 탭 구성
+
+| 탭 | 이름 | 설명 | Week |
+|----|------|------|------|
+| **탭1** | 지도 보기 | 메인 화면. 지도 + 마커 + 반경 필터링. 마커 클릭 시 슬라이드 패널로 요약 정보 표시 | Week 1-2 ✅ |
+| **탭2** | 이용자/활동지원사 관리 | DataGrid 형태. 전체 데이터 CRUD. 상세 정보 편집 | Week 3 |
+| **탭3** | 데이터 관리 | 엑셀 import/export, 자동 백업, 특정 시점 복원 | Week 4 |
+| **탭4** | 설정 | 마커 색상, 반경 색상, UI 테마, 크기 조절 | Week 4 |
+
+### 주간 목표
+
+| Week | 목표 | 상태 |
+|------|------|------|
+| **Week 1** | 기초 설정 + 데이터 모델 + ViewModel + UI 레이아웃 | ✅ 완료 |
+| **Week 2** | 네이버 지도 연동 + JS Interop + 마커 렌더링 + **Supabase 연동** | ✅ 완료 |
+| **Week 3** | 탭2 (CRUD 관리) + 탭1 슬라이드 패널 (읽기/수정) | 🔲 예정 |
+| **Week 4** | 탭3 (데이터 관리) + 탭4 (설정) + 테스트 | 🔲 예정 |
 
 ---
 
 ## 🗓️ Week 1: 기초 인프라 (Day 1-7) ✅ 완료
 
 ### Day 1-2: 프로젝트 설정 ✅
-**목표**: MAUI 프로젝트 생성, 폴더 구조, Git 초기화
-
-**작업 완료**:
-- [x] .NET MAUI 9.0 프로젝트 생성
+- [x] .NET MAUI 10.0 프로젝트 생성
 - [x] CommunityToolkit.Mvvm 패키지 설치 (8.2.2)
 - [x] 폴더 구조 생성 (Models, Services, ViewModels, Views)
-- [x] GlobalUsings.cs 생성 (System, MAUI, MVVM, 프로젝트 네임스페이스)
-- [x] .gitignore 생성
-- [x] Git 초기화 및 첫 커밋
-
-**산출물**:
-```
-src/LmpLink.MAUI/
-├── Models/
-├── Services/
-│   ├── Interfaces/
-│   └── Implementation/
-├── ViewModels/
-│   └── Base/
-├── Views/
-│   └── Pages/
-├── Resources/
-│   ├── Styles/
-│   └── Raw/
-└── Converters/
-```
-
----
+- [x] GlobalUsings.cs, .gitignore, Git 초기화
 
 ### Day 3-4: 데이터 모델 & Mock Service ✅
-**목표**: Person 모델, Mock 데이터, 거리 계산 서비스
-
-**작업 완료**:
 - [x] Models/Person.cs (record type)
-  - PersonType enum (User, Assistant)
-  - 10개 필드 (Id, Name, Type, Lat, Lng, Address, Phone, Gender, HasVehicle, etc.)
-  - DistanceKm 계산 프로퍼티
-- [x] Services/Interfaces/IMockDataService.cs
-  - GetUsersAsync(), GetAssistantsAsync(), GetAllPersonsAsync()
-- [x] Services/Implementation/MockDataService.cs
-  - 이용자 10명 (ID 1-10, 도봉구청 중심 0-4km)
-  - 지원사 20명 (ID 11-30, 도봉구청 중심 0-4km)
-- [x] Services/Interfaces/ILocationService.cs
-  - CalculateDistance (Haversine), FilterByRadius, SortByDistance
-- [x] Services/Implementation/LocationService.cs
-  - Haversine 공식 구현, 거리 소수점 2자리 반올림
-- [x] MauiProgram.cs DI 등록
-
-**테스트 결과**:
-- ✅ Users.Count == 10
-- ✅ Assistants.Count == 20
-- ✅ CalculateDistance(user1, assistant1) ≈ 0.5-4.0km
-- ✅ FilterByRadius(3km) 반환 개수 정확
-
----
+- [x] MockDataService (이용자 10명 + 지원사 20명)
+- [x] LocationService (Haversine 거리 계산)
 
 ### Day 5-7: BaseViewModel & MapViewModel ✅
-**목표**: MVVM 패턴 확립, 필터링 로직 구현
-
-**작업 완료**:
-- [x] ViewModels/Base/BaseViewModel.cs
-  - ObservableObject 상속
-  - IsLoading, HasError, ErrorMessage 프로퍼티
-  - ExecuteAsync(Func<Task>), ExecuteAsync<T>
-  - HandleError, ClearError
-- [x] ViewModels/MapViewModel.cs
-  - Properties: Users, Assistants, FilteredAssistants (ObservableCollection)
-  - SelectedUser, CurrentRadius (ObservableProperty)
-  - LoadDataCommand, SelectUserCommand, ChangeRadiusCommand, ShowAllCommand
-  - FilterAssistantsByRadius(), UpdateFilterStatusText()
-- [x] Converters/CommonConverters.cs
-  - InvertedBoolConverter, IsNotNullConverter
-- [x] MauiProgram.cs DI 등록 (MapViewModel)
-
-**Blazor → MAUI 변환 완료**:
-- ✅ `private List<Person>` → `ObservableCollection<Person>`
-- ✅ `FilterByRadius(double)` → `ChangeRadiusCommand` (RelayCommand)
-- ✅ `ShowAll()` → `ShowAllCommand` (RelayCommand)
+- [x] BaseViewModel (IsLoading, ErrorMessage, ExecuteAsync)
+- [x] MapViewModel (Users, Assistants, FilteredAssistants, Commands)
+- [x] CommonConverters (InvertedBoolConverter, IsNotNullConverter)
 
 ---
 
-## 🗓️ Week 2: UI & 네이버 지도 연동 (Day 8-14)
+## 🗓️ Week 2: UI & 지도 & Supabase (Day 8-14) ✅ 완료
 
 ### Day 8-10: MainPage XAML 레이아웃 ✅
-**목표**: Grid 2열 레이아웃, CollectionView, WebView
-
-**작업 완료**:
-- [x] MainPage.xaml (Grid 2열: 3*,7*)
-  - 좌측 30%: 이용자 목록 + 반경 버튼
-  - 우측 70%: WebView (지도 플레이스홀더)
-- [x] Resources/Styles/Colors.xaml (다크 테마)
-  - BackgroundDeepNavy, SurfaceDarkGray, TextPrimary, PrimaryCTA
-  - UserMarker, AssistantMarker, Success, Warning, Error
-- [x] Resources/Styles/Styles.xaml
-  - Typography: DisplayText, Heading1, Heading2, BodyText, SmallText, CaptionText
-  - Button: PrimaryCTAButton, SecondaryButton, PillButton
+- [x] Grid 2열 레이아웃 (30% + 70%)
+- [x] 다크 테마 디자인 시스템 (Colors.xaml, Styles.xaml)
 - [x] CollectionView ItemTemplate (카드 스타일)
-  - Frame (SurfaceDarkGray 배경, CornerRadius 8)
-  - 파란 원 아이콘 (UserMarker)
-  - Name (Heading2), Address (SmallText), Phone (CaptionText)
-- [x] Resources/Raw/map.html
-  - 네이버 Maps API v3 스크립트
-  - JavaScript 함수: initMap, addMarker, drawCircle, clearCircle
-  - 마커 스타일 (Blazor 검증 로직 기반)
+- [x] Resources/Raw/map.html (네이버 Maps JS)
 
-**디자인 시스템 일관성**:
-- ✅ 다크 테마 색상 100% 적용
-- ✅ Typography 스타일 통일
-- ✅ Button 스타일 통일
+### Day 11-12: 네이버 지도 연동 ✅
+- [x] IMapService / MapService 구현
+- [x] WebView Navigated 이벤트 핸들링
+- [x] User Secrets 설정 (NaverMapApiKey)
 
----
+### Day 13-14: Supabase 연동 ✅ **완료 (2025-12-11)**
+- [x] supabase-csharp NuGet 설치 (v0.16.2)
+- [x] ISupabaseService / SupabaseService 구현
+- [x] User Secrets (SupabaseUrl, SupabaseKey)
+- [x] MapViewModel에서 Supabase 데이터 로드
+- [x] Mock 데이터 Fallback 전략
+- [x] Supabase MCP 연동 완료
 
-### Day 11-12: 네이버 지도 연동 ✅ **완료 (2025-12-10)**
-**목표**: WebView Source 설정, IMapService 구현, JS Interop
-
-**작업 완료**:
-- [x] User Secrets 설정
-  - `dotnet user-secrets init`
-  - `dotnet user-secrets set "NaverMapApiKey" "YOUR_KEY"`
-- [x] Services/Interfaces/IMapService.cs (9개 메서드)
-  - InitMapAsync, AddMarkerAsync, AddMarkersAsync
-  - DrawCircleAsync, ClearCircleAsync
-  - SetMarkerVisibleAsync, ShowAllMarkersAsync, ClearAllMarkersAsync
-  - GetMapCenterAsync, SetMapCenterAsync
-- [x] Services/Implementation/MapService.cs
-  - WebView 참조 관리 (SetWebView)
-  - EvaluateJavaScriptAsync 래퍼
-  - JavaScript escaping, 에러 핸들링
-- [x] MainPage.xaml.cs 업데이트
-  - WebView.Navigated 이벤트 구독
-  - OnViewModelPropertyChanged 구독
-  - HandleSelectedUserChanged, HandleRadiusChanged, HandleFilteredAssistantsChanged
-- [x] MapViewModel - IMapService 통합 (불필요, MainPage에서 직접 처리)
-- [x] MauiProgram.cs DI 등록
+**🎉 Week 2 완료! Supabase에서 30명 데이터 로드 성공!**
 
 ---
 
-### Day 13-14: 마커 렌더링 & 필터링 연동 ✅ **완료 (2025-12-10)**
-**목표**: 코드 검증 및 테스트 시나리오 문서화
+## 🗓️ Week 3: CRUD & 관리 화면 (Day 15-21) 🔲 예정
 
-**작업 완료**:
-- [x] 코드 품질 검증 (ReadLints 통과, 에러 없음)
-- [x] 빌드 상태 확인 (MAUI 워크로드 미설치 확인)
-- [x] 테스트 시나리오 문서화 (6개 항목)
-- [x] 사용자 액션 가이드 작성
-
-**사용자 액션 필요**:
-1. **MAUI 워크로드 설치**:
-   ```bash
-   dotnet workload restore
-   ```
-2. **네이버 Maps API 키 설정**:
-   - 발급: https://www.ncloud.com/product/applicationService/maps
-   - MainPage.xaml Line 145: `ncpKeyId=YOUR_NAVER_CLIENT_ID_HERE` 교체
-3. **빌드 & 실행**:
-```bash
-   dotnet build && dotnet run
-   ```
-
-**테스트 시나리오** (사용자 환경):
-1. ✅ 지도 로드 (<3초)
-2. ✅ 마커 30개 (이용자 10 + 지원사 20)
-3. ✅ 이용자 선택 → 원 + 중심 이동
-4. ✅ 반경 변경 (1km/3km/5km)
-5. ✅ 전체 보기
-6. ✅ 필터 상태 텍스트
-
----
-
-## 🗓️ Week 3: Supabase 연동 (Day 15-21)
-
-### Day 15-18: Supabase 클라이언트 설정
-**목표**: Supabase NuGet 설치, 실제 데이터 로드
+### Day 15-16: 탭 네비게이션 구조
+**목표**: Shell 기반 탭 네비게이션 구축
 
 **작업 계획**:
-- [ ] supabase-csharp NuGet 설치
-- [ ] Services/Interfaces/ISupabaseService.cs
-- [ ] Services/Implementation/SupabaseService.cs
-- [ ] User Secrets (Supabase URL, Anon Key)
-- [ ] GetUsersAsync(), GetAssistantsAsync() 구현
-- [ ] MockDataService → SupabaseService 전환
+- [ ] AppShell.xaml 수정 (TabBar 추가)
+- [ ] Views/Pages/MapPage.xaml (기존 MainPage 이동)
+- [ ] Views/Pages/ManagementPage.xaml (탭2)
+- [ ] Views/Pages/DataPage.xaml (탭3)
+- [ ] Views/Pages/SettingsPage.xaml (탭4)
+- [ ] 탭 아이콘 추가 (Resources/Images)
+
+**구조**:
+```xml
+<Shell>
+  <TabBar>
+    <Tab Title="지도" Icon="map.png">
+      <ShellContent ContentTemplate="{DataTemplate pages:MapPage}"/>
+    </Tab>
+    <Tab Title="관리" Icon="users.png">
+      <ShellContent ContentTemplate="{DataTemplate pages:ManagementPage}"/>
+    </Tab>
+    <Tab Title="데이터" Icon="database.png">
+      <ShellContent ContentTemplate="{DataTemplate pages:DataPage}"/>
+    </Tab>
+    <Tab Title="설정" Icon="settings.png">
+      <ShellContent ContentTemplate="{DataTemplate pages:SettingsPage}"/>
+    </Tab>
+  </TabBar>
+</Shell>
+```
 
 ---
 
-### Day 19-21: Supabase Auth 통합
-**목표**: 로그인/로그아웃, 세션 관리
+### Day 17-18: 탭1 - 슬라이드 패널 (상세정보)
+**목표**: 마커 클릭 시 오른쪽 슬라이드 패널로 요약 정보 표시
 
 **작업 계획**:
-- [ ] Views/Pages/LoginPage.xaml
-- [ ] ViewModels/LoginViewModel.cs
-- [ ] Services/Interfaces/IAuthService.cs
-- [ ] Services/Implementation/AuthService.cs
-- [ ] Shell Navigation: LoginPage → MainPage
-- [ ] SecureStorage에 세션 토큰 저장
+- [ ] Views/Controls/PersonDetailPanel.xaml (슬라이드 패널)
+- [ ] ViewModels/PersonDetailViewModel.cs
+- [ ] 마커 클릭 이벤트 → SelectedPerson 설정
+- [ ] 패널 표시/숨김 애니메이션
+- [ ] "상세 편집" 버튼 → 탭2로 이동
+
+**슬라이드 패널 UI**:
+```
+┌──────────────────────────┐
+│ 👤 김지원 (활동지원사)    │ ← 이름, 타입
+├──────────────────────────┤
+│ 📧 assistant1@example.com│ ← 이메일
+│ 📞 010-2001-0001         │ ← 전화번호
+│ 📍 서울 도봉구 도봉동     │ ← 주소
+│ 🚗 차량: 있음             │ ← 차량 소유
+│ ⏰ 가능 시간: 평일 오전    │ ← 시간대
+│ 💼 경력: 5년              │ ← 경력
+├──────────────────────────┤
+│ [상세 편집] [닫기]        │
+└──────────────────────────┘
+```
 
 ---
 
-## 🗓️ Week 4: AI & 배포 (Day 22-28)
-
-### Day 22-24: n8n 웹훅 연동
-**목표**: AI 추천 기능 구현
+### Day 19-21: 탭2 - 이용자/활동지원사 관리
+**목표**: DataGrid 형태의 전체 데이터 CRUD
 
 **작업 계획**:
-- [ ] Services/Interfaces/IAiRecommendationService.cs
-- [ ] Services/Implementation/AiRecommendationService.cs
-- [ ] Models/MatchScore.cs
-- [ ] n8n 웹훅 URL 설정
-- [ ] GetRecommendationsAsync() 구현
+- [ ] ViewModels/ManagementViewModel.cs
+- [ ] Views/Pages/ManagementPage.xaml
+- [ ] DataGrid (CollectionView + Header)
+- [ ] 필터 (이용자/지원사 토글)
+- [ ] 검색 (이름, 주소)
+- [ ] 정렬 (이름, 경력, 주소)
+- [ ] CRUD 기능:
+  - [ ] **Create**: 신규 등록 폼
+  - [ ] **Read**: 전체 목록 + 상세 보기
+  - [ ] **Update**: 인라인 편집 또는 편집 폼
+  - [ ] **Delete**: 삭제 확인 다이얼로그
+- [ ] SupabaseService CRUD 메서드 연동
+  - [ ] UpsertPersonAsync() 연동
+  - [ ] DeletePersonAsync() 연동
+
+**관리 화면 UI**:
+```
+┌─────────────────────────────────────────────────────────────┐
+│ [+ 신규 등록]  [이용자 ▼] [지원사 ▼]  🔍 검색: [________] │
+├─────────────────────────────────────────────────────────────┤
+│ ID │ 이름   │ 타입   │ 주소          │ 전화번호     │ 경력 │
+├────┼────────┼────────┼───────────────┼──────────────┼──────┤
+│ 1  │ 김영희 │ 이용자 │ 서울 도봉구...│ 010-1234-... │ -    │
+│ 2  │ 이철수 │ 이용자 │ 서울 도봉구...│ 010-1234-... │ -    │
+│ 11 │ 김지원 │ 지원사 │ 서울 도봉구...│ 010-2001-... │ 5년  │
+│ ...│ ...    │ ...    │ ...           │ ...          │ ...  │
+├────┴────────┴────────┴───────────────┴──────────────┴──────┤
+│ [< 이전] 페이지 1/3 [다음 >]                    총 30명    │
+└─────────────────────────────────────────────────────────────┘
+```
 
 ---
 
-### Day 25-28: 테스트 & 배포
-**목표**: Windows MSIX 빌드
+## 🗓️ Week 4: 데이터 & 설정 (Day 22-28) 🔲 예정
+
+### Day 22-24: 탭3 - 데이터 관리
+**목표**: 엑셀 import/export, 백업/복원
 
 **작업 계획**:
-- [ ] 성능 최적화 (CollectionView 가상화)
-- [ ] 에러 핸들링 완성
-- [ ] Windows MSIX 빌드
-- [ ] 배포 문서 작성
+- [ ] ViewModels/DataViewModel.cs
+- [ ] Views/Pages/DataPage.xaml
+- [ ] **엑셀 내보내기 (Export)**:
+  - [ ] ClosedXML 또는 EPPlus NuGet 설치
+  - [ ] ExportToExcelAsync() 구현
+  - [ ] 파일 저장 다이얼로그
+- [ ] **엑셀 불러오기 (Import)**:
+  - [ ] ImportFromExcelAsync() 구현
+  - [ ] 파일 선택 다이얼로그
+  - [ ] 데이터 검증 + 미리보기
+  - [ ] Supabase 동기화
+- [ ] **자동 백업**:
+  - [ ] 백업 주기 설정 (매일/매주/수동)
+  - [ ] Supabase Edge Function 또는 로컬 저장
+  - [ ] 백업 목록 표시 (날짜, 크기)
+- [ ] **복원 (Rollback)**:
+  - [ ] 특정 백업 시점 선택
+  - [ ] 복원 확인 다이얼로그
+  - [ ] 복원 실행
+- [ ] **현재 데이터 저장**:
+  - [ ] 수동 저장 버튼
+  - [ ] 저장 상태 표시
+
+**데이터 관리 UI**:
+```
+┌─────────────────────────────────────────────────────────────┐
+│ 📥 데이터 관리                                              │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│ ┌─────────────────────────────────────────────────────────┐│
+│ │ 📤 엑셀 내보내기                                        ││
+│ │ 현재 데이터를 엑셀 파일로 저장합니다.                    ││
+│ │ [엑셀로 내보내기]                                       ││
+│ └─────────────────────────────────────────────────────────┘│
+│                                                             │
+│ ┌─────────────────────────────────────────────────────────┐│
+│ │ 📥 엑셀 불러오기                                        ││
+│ │ 엑셀 파일에서 데이터를 가져옵니다.                       ││
+│ │ [엑셀에서 불러오기]                                     ││
+│ └─────────────────────────────────────────────────────────┘│
+│                                                             │
+│ ┌─────────────────────────────────────────────────────────┐│
+│ │ 🔄 백업 설정                                            ││
+│ │ 자동 백업 주기: [매일 ▼]  시간: [03:00 ▼]              ││
+│ │ [설정 저장]                                             ││
+│ └─────────────────────────────────────────────────────────┘│
+│                                                             │
+│ ┌─────────────────────────────────────────────────────────┐│
+│ │ 📋 백업 목록                                            ││
+│ ├─────────────────────────────────────────────────────────┤│
+│ │ 날짜            │ 크기   │ 상태   │ 액션               ││
+│ │ 2025-12-11 03:00│ 45KB   │ ✅ 완료│ [복원] [삭제]      ││
+│ │ 2025-12-10 03:00│ 44KB   │ ✅ 완료│ [복원] [삭제]      ││
+│ │ 2025-12-09 03:00│ 43KB   │ ✅ 완료│ [복원] [삭제]      ││
+│ └─────────────────────────────────────────────────────────┘│
+│                                                             │
+│ [💾 현재 데이터 저장]                                       │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
 
 ---
 
-## 📋 Cursor AI 프롬프트 모음
+### Day 25-28: 탭4 - 설정
+**목표**: UI 커스터마이징, 테마 설정
 
-### ViewModel 생성
+**작업 계획**:
+- [ ] ViewModels/SettingsViewModel.cs
+- [ ] Views/Pages/SettingsPage.xaml
+- [ ] **마커 설정**:
+  - [ ] 이용자 마커 색상 (ColorPicker)
+  - [ ] 활동지원사 마커 색상
+  - [ ] 마커 크기 (Small/Medium/Large)
+- [ ] **반경 원 설정**:
+  - [ ] 원 색상
+  - [ ] 원 투명도 (Opacity 슬라이더)
+  - [ ] 원 테두리 두께
+- [ ] **UI 테마**:
+  - [ ] 다크 모드 / 라이트 모드 토글
+  - [ ] 커스텀 색상 팔레트
+- [ ] **UI 크기**:
+  - [ ] 폰트 크기 (Small/Medium/Large)
+  - [ ] 카드 크기
+  - [ ] 버튼 크기
+- [ ] **설정 저장**:
+  - [ ] Preferences (MAUI) 사용
+  - [ ] 앱 시작 시 설정 로드
+
+**설정 UI**:
 ```
-/maui-viewmodel [ViewModelName]
-
-Properties: [property list]
-Commands: [command list]
-Services: [service interfaces]
-
-60-maui-core.mdc Pattern 4 참고해줘.
-```
-
-### Page 생성
-```
-/maui-page [PageName]
-
-레이아웃: [layout description]
-ViewModel: [ViewModel name]
-
-디자인_시스템.md Section 6 참고해줘.
-```
-
-### Service 생성
-```
-/maui-service [ServiceName]
-
-메서드: [method list]
-
-60-maui-core.mdc Pattern 3 참고해줘.
+┌─────────────────────────────────────────────────────────────┐
+│ ⚙️ 설정                                                     │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│ 🎨 마커 설정                                                │
+│ ├─ 이용자 마커 색상: [🔵 파란색 ▼]                         │
+│ ├─ 활동지원사 마커 색상: [🟠 주황색 ▼]                     │
+│ └─ 마커 크기: ○ Small  ● Medium  ○ Large                   │
+│                                                             │
+│ 🔘 반경 원 설정                                             │
+│ ├─ 원 색상: [🔵 파란색 ▼]                                  │
+│ ├─ 투명도: [━━━━━●━━━━] 50%                                │
+│ └─ 테두리 두께: [━━●━━━━━━━] 2px                           │
+│                                                             │
+│ 🌙 테마                                                     │
+│ └─ [🌙 다크 모드] ━━━━━●━ ON                               │
+│                                                             │
+│ 📐 UI 크기                                                  │
+│ ├─ 폰트 크기: ○ Small  ● Medium  ○ Large                   │
+│ └─ 카드 크기: ○ Compact  ● Normal  ○ Large                 │
+│                                                             │
+│ [설정 초기화] [설정 저장]                                   │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## ✅ 주간 체크리스트
+## 📋 추가 기능 추천 (Week 5-6 확장)
 
-### Week 1 ✅
-- [x] 프로젝트 설정 완료
-- [x] 데이터 모델 & Mock Service 완료
-- [x] BaseViewModel & MapViewModel 완료
+### 🔐 인증 & 권한 (추천: Week 5)
+- [ ] Supabase Auth 연동
+- [ ] 로그인/로그아웃 페이지
+- [ ] 역할 기반 권한 (관리자/일반 사용자)
+- [ ] RLS(Row Level Security) 정책 적용
 
-### Week 2 (진행 중)
-- [x] MainPage XAML 레이아웃 완료
-- [x] 다크 테마 디자인 시스템 적용 완료
-- [ ] 네이버 지도 연동
-- [ ] 마커 렌더링 & 필터링
+### 📊 대시보드 (추천: Week 5)
+- [ ] 통계 카드 (총 이용자, 총 지원사, 오늘 매칭 수)
+- [ ] 차트 (반경별 분포, 시간대별 가용성)
+- [ ] 최근 활동 로그
 
-### Week 3
-- [ ] Supabase 클라이언트 설정
-- [ ] Supabase Auth 통합
-- [ ] CRUD 기능
+### 🔔 알림 시스템 (추천: Week 6)
+- [ ] 앱 내 알림
+- [ ] 새 데이터 추가 시 알림
+- [ ] 백업 완료 알림
+- [ ] 에러 알림
 
-### Week 4
+### 📱 반응형 레이아웃 (추천: Week 6)
+- [ ] 태블릿 최적화
+- [ ] 창 크기 변경 시 레이아웃 조정
+- [ ] 축소/확대 지원
+
+### 🔍 고급 검색 & 필터 (추천: Week 6)
+- [ ] 복합 필터 (성별 + 차량 + 시간대)
+- [ ] 저장된 필터 프리셋
+- [ ] 검색 히스토리
+
+### 🤖 AI 추천 (추천: Week 6)
 - [ ] n8n 웹훅 연동
+- [ ] 매칭 점수 계산
+- [ ] 추천 이유 표시
+
+---
+
+## ✅ 체크리스트 요약
+
+### Week 1-2 ✅ 완료
+- [x] 프로젝트 설정
+- [x] 데이터 모델 & Mock Service
+- [x] BaseViewModel & MapViewModel
+- [x] MainPage XAML 레이아웃
+- [x] 네이버 지도 연동
+- [x] Supabase 연동
+
+### Week 3 🔲 예정
+- [ ] Shell TabBar 네비게이션
+- [ ] 탭1 슬라이드 패널 (상세정보)
+- [ ] 탭2 관리 화면 (DataGrid + CRUD)
+
+### Week 4 🔲 예정
+- [ ] 탭3 데이터 관리 (엑셀, 백업)
+- [ ] 탭4 설정 (마커, 테마, UI)
 - [ ] 테스트 & 배포
+
+### Week 5-6 (확장) 🔲 선택
+- [ ] 인증 & 권한
+- [ ] 대시보드
+- [ ] 알림 시스템
+- [ ] 반응형 레이아웃
+- [ ] 고급 검색 & 필터
+- [ ] AI 추천
 
 ---
 
@@ -314,10 +424,10 @@ ViewModel: [ViewModel name]
 - [MAUI_개발_가이드.md](./MAUI_개발_가이드.md) - 기술 구현 (55+ 프롬프트)
 - [Blazor_to_MAUI_참고자료.md](./Blazor_to_MAUI_참고자료.md) - 검증된 로직
 - [진척_관리.md](./진척_관리.md) - 일일 작업 로그
-- [작업_일관성_분석_및_통합_계획.md](./작업_일관성_분석_및_통합_계획.md) - 일관성 분석
+- [Supabase_연동_가이드.md](./Supabase_연동_가이드.md) - Supabase 설정
 
 ---
 
-**문서 버전**: 1.0  
-**마지막 업데이트**: 2025-12-10  
-**현재 진행률**: 36% (10/28 days)
+**문서 버전**: 2.0  
+**마지막 업데이트**: 2025-12-11  
+**현재 진행률**: 50% (Week 1-2 완료, Week 3-4 예정)
