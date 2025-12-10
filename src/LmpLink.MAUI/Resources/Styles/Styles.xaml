@@ -29,7 +29,26 @@
         <Setter Property="TextColor" Value="{StaticResource TextPrimary}" />
     </Style>
 
-    <!-- Body: Main Content -->
+    <!-- Heading 3: Sub-section Titles -->
+    <Style x:Key="Heading3" TargetType="Label">
+        <Setter Property="FontSize" Value="18" />
+        <Setter Property="FontAttributes" Value="Bold" />
+        <Setter Property="TextColor" Value="{StaticResource TextPrimary}" />
+    </Style>
+
+    <!-- Body 1: Main Content -->
+    <Style x:Key="Body1" TargetType="Label">
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="TextColor" Value="{StaticResource TextPrimary}" />
+    </Style>
+
+    <!-- Body 2: Secondary Content -->
+    <Style x:Key="Body2" TargetType="Label">
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="TextColor" Value="{StaticResource TextSecondary}" />
+    </Style>
+
+    <!-- Body: Main Content (Legacy) -->
     <Style x:Key="BodyText" TargetType="Label">
         <Setter Property="FontSize" Value="16" />
         <Setter Property="TextColor" Value="{StaticResource TextPrimary}" />
@@ -39,6 +58,12 @@
     <Style x:Key="SmallText" TargetType="Label">
         <Setter Property="FontSize" Value="14" />
         <Setter Property="TextColor" Value="{StaticResource TextSecondary}" />
+    </Style>
+
+    <!-- Caption: Hints (Alias) -->
+    <Style x:Key="Caption" TargetType="Label">
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="TextColor" Value="{StaticResource TextTertiary}" />
     </Style>
 
     <!-- Caption: Hints -->

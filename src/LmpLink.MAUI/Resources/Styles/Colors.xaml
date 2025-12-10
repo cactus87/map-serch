@@ -8,16 +8,22 @@
     <!-- Background Colors -->
     <Color x:Key="BackgroundDeepNavy">#111827</Color>
     <Color x:Key="SurfaceDarkGray">#1F2937</Color>
+    <Color x:Key="SurfaceDarkNavy">#0F172A</Color>
 
     <!-- Text Colors (Dark Theme) -->
     <Color x:Key="TextPrimary">#F9FAFB</Color>
     <Color x:Key="TextSecondary">#9CA3AF</Color>
     <Color x:Key="TextTertiary">#6B7280</Color>
+    <Color x:Key="TextWhite">#FFFFFF</Color>
+    <Color x:Key="TextLightGray">#D1D5DB</Color>
 
     <!-- Action Colors -->
     <Color x:Key="PrimaryCTA">#2DD4BF</Color>
+    <Color x:Key="AccentSecondary">#8B5CF6</Color>
     <Color x:Key="UserMarker">#3B82F6</Color>
     <Color x:Key="AssistantMarker">#F97316</Color>
+    <Color x:Key="MarkerUser">#60A5FA</Color>
+    <Color x:Key="MarkerAssistant">#FB923C</Color>
 
     <!-- Feedback Colors -->
     <Color x:Key="Success">#10B981</Color>
